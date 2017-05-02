@@ -4,15 +4,7 @@ import shutil
 
 from itertools import count
 from lxml import etree
-
-
-def get_svg(*directories):
-	"""Find all SVG icon in directories"""
-	file_list = []
-	for path in directories:
-		for root, _, files in os.walk(path):
-			file_list.extend([os.path.join(root, name) for name in files if name.endswith('.svg')])
-	return file_list
+from aniwall.logger import logger
 
 
 class ImageData:
@@ -67,27 +59,42 @@ class ImageParser:
 	Read and edit SVG images.
 	"""
 	def __init__(self):
-		dl = (os.path.join(os.path.dirname(os.path.abspath(__file__)), "images"),)
-		self.image_list = sorted(get_svg(*dl))
-
 		self.parser = etree.XMLParser(remove_blank_text=True)
 		self.current = None
 		self.temporary = tempfile.NamedTemporaryFile()
 
-	def set_image(self, file_):
-		"""Select currently active image"""
-		# create temporary copy
-		shutil.copy2(file_, self.temporary.name)
+		dl = (os.path.join(os.path.dirname(os.path.abspath(__file__)), "images"),)
+		self.image_list = sorted(self.load_svg(*dl))
 
-		# parse SVG data
-		tree = etree.parse(self.temporary.name, self.parser)
+	def load_svg(self, *directories):
+		"""Find all formatted SVG images in directories"""
+		imagepack = []
+		for path in directories:
+			for root, _, files in os.walk(path):
+				svg_files = [os.path.join(root, name) for name in files if name.endswith('.svg')]
+				# check if images formatted correctly
+				for file_ in svg_files:
+					try:
+						temp_data = self._load_image_data(None, file_)
+						if temp_data.bg is None or any([item is None for item in temp_data.colors]):
+							raise Exception("Missed tag parameter")
+						imagepack.append(file_)
+					except Exception:
+						logger.exception("Broken image file:\n%s" % file_)
+
+		logger.debug("%s image files was found." % len(imagepack))
+		return imagepack
+
+	def _load_image_data(self, file_, source):
+		"""Read image settings from SVG tags"""
+		tree = etree.parse(source, self.parser)
 		root = tree.getroot()
 		xhtml = "{%s}" % root.nsmap[None]
 
-		self.current = ImageData(file_, tree)
+		imagedata = ImageData(file_, tree)
 
 		background_tag = root.find(".//%s*[@id='background']" % xhtml)
-		self.current.set_background(background_tag)
+		imagedata.set_background(background_tag)
 
 		counter = count(1)
 		while True:
@@ -96,7 +103,14 @@ class ImageParser:
 			tag = root.find(".//%s*[@id='%s']" % (xhtml, id_))
 			if tag is None:
 				break
-			self.current.set_color(tag, id_)
+			imagedata.set_color(tag, id_)
+
+		return imagedata
+
+	def set_image(self, file_):
+		"""Select currently active image"""
+		shutil.copy2(file_, self.temporary.name)  # create temporary copy
+		self.current = self._load_image_data(file_, self.temporary.name)  # parse SVG data
 
 	def apply_changes(self):
 		"""Preview image changes"""
