@@ -1,3 +1,4 @@
+import sys
 from logging import getLogger, StreamHandler, Formatter
 
 # The background is set with 40 plus the number of the color, and the foreground with 30
@@ -26,7 +27,7 @@ class ColoredFormatter(Formatter):
 
 logger = getLogger(__name__)
 
-stream_handler = StreamHandler()
+stream_handler = StreamHandler(stream=sys.stdout)
 color_formatter = ColoredFormatter(MESSAGE_PATTERN)
 stream_handler.setFormatter(color_formatter)
 logger.addHandler(stream_handler)
