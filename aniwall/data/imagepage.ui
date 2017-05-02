@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkBox" id="image-box">
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkScrolledWindow" id="image-list-scrolledwindow">
+        <property name="hscrollbar_policy">never</property>
+        <child>
+          <object class="GtkTreeView" id="image-list-treeview">
+            <child internal-child="selection">
+              <object class="GtkTreeSelection" id="image-list-selection"/>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+  </object>
+</interface>

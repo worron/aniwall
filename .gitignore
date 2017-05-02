@@ -1,0 +1,12 @@
+# Ignore python cache
+**/__pycache__
+**/*.pyc
+
+# Ignore IDE settings
+.idea/**
+
+# Temporary ignore (test) images
+aniwall/images/**
+
+# Ignore GTK+ binary
+aniwall/data/aniwall.gresource  
