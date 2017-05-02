@@ -1,6 +1,5 @@
 # Ignore python cache
 **/__pycache__
-**/*.pyc
 
 # Ignore IDE settings
 .idea/**
