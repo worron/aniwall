@@ -39,7 +39,7 @@ class ImageData:
 		if index == 0:
 			self.bg = color
 		else:
-			self.colors[index] = color
+			self.colors[index - 1] = color
 
 	def rebuild(self, file_=None):
 		"""Apply image changes"""
@@ -58,6 +58,8 @@ class ImageParser:
 	Image manager.
 	Read and edit SVG images.
 	"""
+	test_image = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "test.svg")
+
 	def __init__(self):
 		self.parser = etree.XMLParser(remove_blank_text=True)
 		self.current = None
@@ -83,6 +85,9 @@ class ImageParser:
 						logger.exception("Broken image file:\n%s" % file_)
 
 		logger.debug("%s image files was found." % len(imagepack))
+		if not imagepack:
+			logger.warning("No image was found.\nLoad test sample.")
+			imagepack.append(self.test_image)
 		return imagepack
 
 	def _load_image_data(self, file_, source):
