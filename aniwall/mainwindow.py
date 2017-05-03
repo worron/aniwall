@@ -13,6 +13,7 @@ class MainWindow(GuiBase):
 		elements = (
 			"window", "headerbar", "stack", "image-box", "image-list-treeview", "image-list-selection",
 			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
+			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
 		)
 		super().__init__("mainwindow.ui", "imagepage.ui", "colorpage.ui", elements=elements)
 
@@ -37,9 +38,11 @@ class MainWindow(GuiBase):
 			"changed", self._on_image_selection_changed
 		)
 
-		self.gui["color-list-treeview"].connect("row_activated", self.on_color_activated)
+		self.gui["color-list-treeview"].connect("row_activated", self._on_color_activated)
 		self.gui["window"].connect("check-resize", self._on_window_resize)
-		self.gui["image-search-entry"].connect("activate", self.on_image_search_activate)
+		self.gui["image-search-entry"].connect("activate", self._on_image_search_activate)
+		self.gui["shift-x-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 0)
+		self.gui["shift-y-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 1)
 
 	def _build_store(self):
 		"""Build GUI stores"""
@@ -113,7 +116,7 @@ class MainWindow(GuiBase):
 			return self.image_search_text.lower() in model[treeiter][self.IMAGE_STORE.FILE].lower()
 
 	# noinspection PyUnusedLocal
-	def on_image_search_activate(self, *args):
+	def _on_image_search_activate(self, *args):
 		"""GUI handler"""
 		self.image_search_text = self.gui["image-search-entry"].get_text()
 		with self.gui["image-list-selection"].handler_block(self.handler["selection"]):
@@ -121,7 +124,8 @@ class MainWindow(GuiBase):
 			self.gui["image-list-treeview"].set_cursor(0)
 
 	# noinspection PyUnusedLocal
-	def on_color_activated(self, tree, path, column):
+	def _on_color_activated(self, tree, path, column):
+		"""GUI handler"""
 		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._mainapp.mainwindow.gui["window"], use_alpha=False)
 		response = color_dialog.run()
 
@@ -136,3 +140,10 @@ class MainWindow(GuiBase):
 			self.update_preview()
 
 		color_dialog.destroy()
+
+	def _on_shift_spinbutton_value_changed(self, button, index):
+		"""GUI handler"""
+		value = button.get_value()
+		self._parser.current.change_shift(value, index)
+		self._parser.apply_changes()
+		self.update_preview()

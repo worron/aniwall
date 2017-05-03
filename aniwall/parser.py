@@ -1,4 +1,5 @@
 import os
+import re
 import tempfile
 import shutil
 
@@ -16,6 +17,7 @@ class ImageData:
 		self.bg = None
 		self.colors = []
 		self.tags = {}
+		self.shift = [0, 0]
 
 	def get_palette(self):
 		"""Build full list of colors"""
@@ -34,6 +36,12 @@ class ImageData:
 		self.colors.append(tag.get("fill"))
 		self.tags[id_] = tag
 
+	def set_transform(self, tag):
+		"""Save transform properties"""
+		shift = re.search("translate\((.+?),(.+?)\)", tag.get("transform"))
+		self.shift = [shift.group(1), shift.group(2)]
+		self.tags["transform"] = tag
+
 	def change_color(self, color, index):
 		"""Change color in palette by index"""
 		if index == 0:
@@ -41,12 +49,17 @@ class ImageData:
 		else:
 			self.colors[index - 1] = color
 
+	def change_shift(self, value, index):
+		"""Change image main figure offset"""
+		self.shift[index] = value
+
 	def rebuild(self, file_=None):
 		"""Apply image changes"""
 		if file_ is None:
 			file_ = self.file
 
 		self.tags["background"].set("fill", self.bg)
+		self.tags["transform"].set("transform", "translate(%s,%s)" % tuple(self.shift))
 		for i, color in enumerate(self.colors, start=1):
 			self.tags["color" + str(i)].set("fill", color)
 
@@ -77,7 +90,11 @@ class ImageParser:
 				for file_ in svg_files:
 					try:
 						temp_data = self._load_image_data(None, file_)
-						if temp_data.bg is None or any([item is None for item in temp_data.colors]):
+						if (
+							temp_data.bg is None
+							or any([item is None for item in temp_data.colors])
+							or any([item is None for item in temp_data.shift])
+						):
 							raise Exception("Missed tag parameter")
 						imagepack.append(file_)
 					except Exception:
@@ -96,6 +113,9 @@ class ImageParser:
 		xhtml = "{%s}" % root.nsmap[None]
 
 		imagedata = ImageData(file_, tree)
+
+		transform_tag = root.find(".//%s*[@id='transform']" % xhtml)
+		imagedata.set_transform(transform_tag)
 
 		background_tag = root.find(".//%s*[@id='background']" % xhtml)
 		imagedata.set_background(background_tag)
