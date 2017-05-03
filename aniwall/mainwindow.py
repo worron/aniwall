@@ -14,6 +14,7 @@ class MainWindow(GuiBase):
 			"window", "headerbar", "stack", "image-box", "image-list-treeview", "image-list-selection",
 			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
+			"scale-spinbutton",
 		)
 		super().__init__("mainwindow.ui", "imagepage.ui", "colorpage.ui", elements=elements)
 
@@ -43,6 +44,7 @@ class MainWindow(GuiBase):
 		self.gui["image-search-entry"].connect("activate", self._on_image_search_activate)
 		self.gui["shift-x-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 0)
 		self.gui["shift-y-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 1)
+		self.gui["scale-spinbutton"].connect("value-changed", self._on_scale_spinbutton_value_changed)
 
 	def _build_store(self):
 		"""Build GUI stores"""
@@ -94,10 +96,15 @@ class MainWindow(GuiBase):
 		"""GUI handler"""
 		model, sel = selection.get_selected()
 		if sel is not None:
+			# update image preview
 			file_ = model[sel][self.IMAGE_STORE.FILE]
 			self._parser.set_image(file_)
 			self.update_preview()
 			self.update_color_list()
+			# update image data
+			self.gui["scale-spinbutton"].set_value(float(self._parser.current.scale))
+			self.gui["shift-x-spinbutton"].set_value(float(self._parser.current.shift[0]))
+			self.gui["shift-y-spinbutton"].set_value(float(self._parser.current.shift[1]))
 
 	# noinspection PyUnusedLocal
 	def _on_window_resize(self, *args):
@@ -145,5 +152,12 @@ class MainWindow(GuiBase):
 		"""GUI handler"""
 		value = button.get_value()
 		self._parser.current.change_shift(value, index)
+		self._parser.apply_changes()
+		self.update_preview()
+
+	def _on_scale_spinbutton_value_changed(self, button):
+		"""GUI handler"""
+		value = "%.2f" % button.get_value()
+		self._parser.current.change_scale(value)
 		self._parser.apply_changes()
 		self.update_preview()

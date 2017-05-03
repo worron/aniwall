@@ -18,6 +18,7 @@ class ImageData:
 		self.colors = []
 		self.tags = {}
 		self.shift = [0, 0]
+		self.scale = "1.00"
 
 	def get_palette(self):
 		"""Build full list of colors"""
@@ -38,8 +39,11 @@ class ImageData:
 
 	def set_transform(self, tag):
 		"""Save transform properties"""
-		shift = re.search("translate\((.+?),(.+?)\)", tag.get("transform"))
+		attribute = tag.get("transform")
+		shift = re.search("translate\((.+?),(.+?)\)", attribute)
+		scale = re.search("scale\((.+?)\)", attribute)
 		self.shift = [shift.group(1), shift.group(2)]
+		self.scale = scale.group(1)
 		self.tags["transform"] = tag
 
 	def change_color(self, color, index):
@@ -53,13 +57,18 @@ class ImageData:
 		"""Change image main figure offset"""
 		self.shift[index] = value
 
+	def change_scale(self, value):
+		"""Change image main figure scale"""
+		self.scale = value
+
 	def rebuild(self, file_=None):
 		"""Apply image changes"""
 		if file_ is None:
 			file_ = self.file
 
+		transform_data = (self.shift[0], self.shift[1], self.scale)
+		self.tags["transform"].set("transform", "translate(%s,%s) scale(%s)" % transform_data)
 		self.tags["background"].set("fill", self.bg)
-		self.tags["transform"].set("transform", "translate(%s,%s)" % tuple(self.shift))
 		for i, color in enumerate(self.colors, start=1):
 			self.tags["color" + str(i)].set("fill", color)
 
