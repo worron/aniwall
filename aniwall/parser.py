@@ -58,15 +58,14 @@ class ImageParser:
 	Image manager.
 	Read and edit SVG images.
 	"""
-	test_image = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "test.svg")
-
-	def __init__(self):
+	def __init__(self, mainapp):
+		self._mainapp = mainapp
 		self.parser = etree.XMLParser(remove_blank_text=True)
 		self.current = None
 		self.temporary = tempfile.NamedTemporaryFile()
+		self.test_image = os.path.join(self._mainapp.path.data, "test.svg")
 
-		dl = (os.path.join(os.path.dirname(os.path.abspath(__file__)), "images"),)
-		self.image_list = sorted(self.load_svg(*dl))
+		self.image_list = sorted(self.load_svg(self._mainapp.path.images))
 
 	def load_svg(self, *directories):
 		"""Find all formatted SVG images in directories"""

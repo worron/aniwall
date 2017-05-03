@@ -1,6 +1,7 @@
 import os
 
 from gi.repository import GLib, Gio, Gtk
+from aniwall.common import AttributeDict
 from aniwall.mainwindow import MainWindow
 from aniwall.logger import logger
 from aniwall.parser import ImageParser
@@ -27,9 +28,15 @@ class MainApp(Gtk.Application):
 		"""
 		logger.info("Start aniwall")
 
+		# Set data files locations
+		self.path = AttributeDict(
+			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
+			images=os.path.join(os.path.abspath(os.path.dirname(__file__)), "images")
+		)
+
 		# init resources
 		if self.is_local:
-			resource_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data/aniwall.gresource')
+			resource_path = os.path.join(self.path.data, 'aniwall.gresource')
 			resource = Gio.Resource.load(resource_path)
 			# noinspection PyProtectedMember
 			resource._register()
@@ -44,7 +51,7 @@ class MainApp(Gtk.Application):
 		self.add_action(action)
 
 		# init application modules
-		self.parser = ImageParser()
+		self.parser = ImageParser(self)
 		self.mainwindow = MainWindow(self)
 
 		self.mainwindow.update_image_list()
