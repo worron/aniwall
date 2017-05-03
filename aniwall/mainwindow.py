@@ -12,7 +12,7 @@ class MainWindow(GuiBase):
 		# load GUI
 		elements = (
 			"window", "headerbar", "stack", "image-box", "image-list-treeview", "image-list-selection",
-			"preview", "color-box", "color-list-treeview", "color-list-selection",
+			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
 		)
 		super().__init__("mainwindow.ui", "imagepage.ui", "colorpage.ui", elements=elements)
 
@@ -21,6 +21,7 @@ class MainWindow(GuiBase):
 		self.IMAGE_OFFSET = 12
 
 		self.last_size = None
+		self.image_search_text = None
 		self._build_store()
 
 		# set application main window
@@ -31,9 +32,14 @@ class MainWindow(GuiBase):
 		self.gui["stack"].add_titled(self.gui["color-box"], "colors", "Colors")
 
 		# signals
-		self.gui["image-list-selection"].connect("changed", self._on_image_selection_changed)
+		self.handler = {}
+		self.handler["selection"] = self.gui["image-list-selection"].connect(
+			"changed", self._on_image_selection_changed
+		)
+
 		self.gui["color-list-treeview"].connect("row_activated", self.on_color_activated)
 		self.gui["window"].connect("check-resize", self._on_window_resize)
+		self.gui["image-search-entry"].connect("activate", self.on_image_search_activate)
 
 	def _build_store(self):
 		"""Build GUI stores"""
@@ -43,7 +49,9 @@ class MainWindow(GuiBase):
 			self.gui["image-list-treeview"].append_column(column)
 
 		self.image_store = Gtk.ListStore(int, str)
-		self.gui["image-list-treeview"].set_model(self.image_store)
+		self.image_store_filter = self.image_store.filter_new()
+		self.image_store_filter.set_visible_func(self.image_search_filter_func)
+		self.gui["image-list-treeview"].set_model(self.image_store_filter)
 
 		# image colors store
 		for i, title in enumerate(("#", "Name", "HEX")):
@@ -73,8 +81,8 @@ class MainWindow(GuiBase):
 		if self._parser.current is not None:
 			pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
 				self._parser.temporary.name,
-				max(self.gui["preview"].get_allocated_width() - self.IMAGE_OFFSET, 1),
-				max(self.gui["preview"].get_allocated_height() - self.IMAGE_OFFSET, 1),
+				max(self.gui["preview"].get_allocated_width() - 2 * self.IMAGE_OFFSET, 1),
+				max(self.gui["preview"].get_allocated_height() - 2 * self.IMAGE_OFFSET, 1),
 				True
 			)
 			self.gui["preview"].set_from_pixbuf(pixbuf)
@@ -95,6 +103,22 @@ class MainWindow(GuiBase):
 		if self.last_size != size:
 			self.last_size = size
 			self.update_preview()
+
+	# noinspection PyUnusedLocal
+	def image_search_filter_func(self, model, treeiter, data):
+		"""Function to filter images list by search text"""
+		if not self.image_search_text:
+			return True
+		else:
+			return self.image_search_text.lower() in model[treeiter][self.IMAGE_STORE.FILE].lower()
+
+	# noinspection PyUnusedLocal
+	def on_image_search_activate(self, *args):
+		"""GUI handler"""
+		self.image_search_text = self.gui["image-search-entry"].get_text()
+		with self.gui["image-list-selection"].handler_block(self.handler["selection"]):
+			self.image_store_filter.refilter()
+			self.gui["image-list-treeview"].set_cursor(0)
 
 	# noinspection PyUnusedLocal
 	def on_color_activated(self, tree, path, column):

@@ -2,11 +2,33 @@
 <interface>
   <object class="GtkBox" id="image-box">
     <property name="orientation">vertical</property>
+    <property name="spacing">6</property>
+    <child>
+      <object class="GtkBox" id="image-panel-box">
+        <property name="orientation">horizontal</property>
+        <child>
+          <object class="GtkSearchEntry" id="image-search-entry">
+            <property name="hexpand">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
     <child>
       <object class="GtkScrolledWindow" id="image-list-scrolledwindow">
         <property name="hscrollbar_policy">never</property>
         <child>
           <object class="GtkTreeView" id="image-list-treeview">
+            <property name="headers_visible">False</property>
             <child internal-child="selection">
               <object class="GtkTreeSelection" id="image-list-selection"/>
             </child>
@@ -16,7 +38,7 @@
       <packing>
         <property name="expand">True</property>
         <property name="fill">True</property>
-        <property name="position">0</property>
+        <property name="position">1</property>
       </packing>
     </child>
   </object>
