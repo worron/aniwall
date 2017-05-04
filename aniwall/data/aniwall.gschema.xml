@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="com.github.worron.aniwall" path="/com/github/worron/aniwall/">
+    <key name="color-column-width-1" type="i">
+      <range min="20" max="1000"/>
+      <default>100</default>
+    </key>
+    <key name="color-column-width-2" type="i">
+      <range min="20" max="1000"/>
+      <default>100</default>
+    </key>
+  </schema>
+</schemalist>

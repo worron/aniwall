@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from gi.repository import GLib, Gio, Gtk
 from aniwall.common import AttributeDict
@@ -31,15 +32,33 @@ class MainApp(Gtk.Application):
 		# Set data files locations
 		self.path = AttributeDict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
-			images=os.path.join(os.path.abspath(os.path.dirname(__file__)), "images")
+			images=os.path.join(os.path.abspath(os.path.dirname(__file__)), "images"),
+			user=os.path.expanduser("~/.config/aniwall")
 		)
 
 		# init resources
 		if self.is_local:
-			resource_path = os.path.join(self.path.data, 'aniwall.gresource')
+			resource_path = os.path.join(self.path.data, "aniwall.gresource")
 			resource = Gio.Resource.load(resource_path)
 			# noinspection PyProtectedMember
 			resource._register()
+
+		# init settings
+		if not os.path.exists(self.path.user):
+			os.makedirs(self.path.user)
+
+		user_schema = os.path.join(self.path.user, "gschemas.compiled")
+		if not os.path.isfile(user_schema):
+			shutil.copyfile(os.path.join(self.path.data, "gschemas.compiled"), user_schema)
+			logger.info("Set user config location:\n%s" % self.path.user)
+
+		schema_source = Gio.SettingsSchemaSource.new_from_directory(
+			self.path.data,
+			Gio.SettingsSchemaSource.get_default(),
+			False,
+		)
+		schema = schema_source.lookup("com.github.worron.aniwall", False)
+		self.settings = Gio.Settings.new_full(schema, None, None)
 
 		# set application actions
 		action = Gio.SimpleAction.new("about", None)
@@ -63,6 +82,7 @@ class MainApp(Gtk.Application):
 		# show window
 		self.mainwindow.gui["window"].show_all()
 		self.mainwindow.update_preview()
+		self.mainwindow.restore_state()
 
 	def do_command_line(self, command_line):
 		if not self.mainwindow:
@@ -77,6 +97,7 @@ class MainApp(Gtk.Application):
 		return 0
 
 	def do_shutdown(self):
+		self.mainwindow.save_state()
 		logger.info("Exit aniwall")
 		Gtk.Application.do_shutdown(self)
 

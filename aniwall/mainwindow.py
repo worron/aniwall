@@ -1,6 +1,6 @@
 import os
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf, GLib
 from aniwall.common import AttributeDict, GuiBase, hex_from_rgba, pixbuf_from_hex
 
 
@@ -50,7 +50,6 @@ class MainWindow(GuiBase):
 	def _build_store(self):
 		"""Build GUI stores"""
 		# image list store
-		# for i, title in enumerate(("#", "File")):
 		for i, title in enumerate(("#", "File", "Name", "Location")):
 			column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
 			self.gui["image-list-treeview"].append_column(column)
@@ -102,6 +101,31 @@ class MainWindow(GuiBase):
 			)
 			self.gui["preview"].set_from_pixbuf(pixbuf)
 
+	# noinspection PyUnusedLocal
+	def image_search_filter_func(self, model, treeiter, data):
+		"""Function to filter images list by search text"""
+		if not self.image_search_text:
+			return True
+		else:
+			return self.image_search_text.lower() in model[treeiter][self.IMAGE_STORE.FILE].lower()
+
+	def save_state(self):
+		"""Safe GUI widget state"""
+		for i, column in enumerate(self.gui["color-list-treeview"].get_columns()):
+			if i in (self.COLOR_STORE.NAME, self.COLOR_STORE.COLOR):
+				width = column.get_width()
+				key = "color-column-width-%d" % i
+				if self._mainapp.settings.range_check(key, GLib.Variant.new_int32(width)):
+					self._mainapp.settings.set_int(key, width)
+
+	def restore_state(self):
+		"""Restore GUI widget state"""
+		for i, column in enumerate(self.gui["color-list-treeview"].get_columns()):
+			if i in (self.COLOR_STORE.NAME, self.COLOR_STORE.COLOR):
+				key = "color-column-width-%d" % i
+				width = self._mainapp.settings.get_int(key)
+				column.set_fixed_width(width)
+
 	def _on_image_selection_changed(self, selection):
 		"""GUI handler"""
 		model, sel = selection.get_selected()
@@ -123,14 +147,6 @@ class MainWindow(GuiBase):
 		if self.last_size != size:
 			self.last_size = size
 			self.update_preview()
-
-	# noinspection PyUnusedLocal
-	def image_search_filter_func(self, model, treeiter, data):
-		"""Function to filter images list by search text"""
-		if not self.image_search_text:
-			return True
-		else:
-			return self.image_search_text.lower() in model[treeiter][self.IMAGE_STORE.FILE].lower()
 
 	# noinspection PyUnusedLocal
 	def _on_image_search_activate(self, *args):

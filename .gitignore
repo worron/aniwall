@@ -9,3 +9,4 @@ aniwall/images/**
 
 # Ignore GTK+ binary
 aniwall/data/aniwall.gresource  
+aniwall/data/gschemas.compiled
