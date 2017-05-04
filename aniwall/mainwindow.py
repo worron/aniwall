@@ -1,7 +1,7 @@
 import os
 
 from gi.repository import Gtk, GdkPixbuf
-from aniwall.common import AttributeDict, GuiBase, hex_from_rgba
+from aniwall.common import AttributeDict, GuiBase, hex_from_rgba, pixbuf_from_hex
 
 
 class MainWindow(GuiBase):
@@ -20,7 +20,7 @@ class MainWindow(GuiBase):
 		super().__init__("mainwindow.ui", "imagepage.ui", "colorpage.ui", elements=elements)
 
 		self.IMAGE_STORE = AttributeDict(INDEX=0, FILE=1, NAME=2, LOCATION=3)
-		self.COLOR_STORE = AttributeDict(INDEX=0, NAME=1, HEX=2)
+		self.COLOR_STORE = AttributeDict(INDEX=0, NAME=1, COLOR=2, HEX=3)
 		self.IMAGE_OFFSET = 12
 
 		self.last_size = None
@@ -63,11 +63,15 @@ class MainWindow(GuiBase):
 		self.gui["image-list-treeview"].set_model(self.image_store_filter)
 
 		# image colors store
-		for i, title in enumerate(("#", "Name", "HEX")):
-			column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
+		for i, title in enumerate(("#", "Name", "Color", "HEX")):
+			if i == self.COLOR_STORE.COLOR:
+				column = Gtk.TreeViewColumn(title, Gtk.CellRendererPixbuf().new(), pixbuf=i)
+			else:
+				column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
+			column.set_property("resizable", True)
 			self.gui["color-list-treeview"].append_column(column)
 
-		self.color_store = Gtk.ListStore(int, str, str)
+		self.color_store = Gtk.ListStore(int, str, GdkPixbuf.Pixbuf, str)
 		self.gui["color-list-treeview"].set_model(self.color_store)
 
 	def update_image_list(self):
@@ -82,7 +86,8 @@ class MainWindow(GuiBase):
 		"""Set color palette for GUI treeview"""
 		self.color_store.clear()
 		for line in self._parser.current.get_palette():
-			self.color_store.append(line)
+			pixbuf = pixbuf_from_hex(line["hex"])
+			self.color_store.append([line["index"], line["name"], pixbuf, line["hex"]])
 
 		self.gui["color-list-treeview"].set_cursor(0)
 
@@ -147,6 +152,7 @@ class MainWindow(GuiBase):
 			color_index = self.color_store[treeiter][self.COLOR_STORE.INDEX]
 
 			self.color_store[treeiter][self.COLOR_STORE.HEX] = hex_color
+			self.color_store[treeiter][self.COLOR_STORE.COLOR] = pixbuf_from_hex(hex_color)
 			self._parser.current.change_color(hex_color, color_index)
 			self._parser.apply_changes()
 			self.update_preview()

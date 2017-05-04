@@ -22,9 +22,9 @@ class ImageData:
 
 	def get_palette(self):
 		"""Build full list of colors"""
-		palette = [(0, "Background", self.bg)]
+		palette = [dict(index=0, name="Background", hex=self.bg)]
 		for i, color in enumerate(self.colors, start=1):
-			palette.append((i, "Color" + str(i), color))
+			palette.append(dict(index=i, name="Color" + str(i), hex=color))
 		return palette
 
 	def set_background(self, tag):

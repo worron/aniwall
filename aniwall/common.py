@@ -1,9 +1,16 @@
-from gi.overrides import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 
 def hex_from_rgba(rgba):
 	"""Translate color from Gdk.RGBA to html hex format"""
 	return "#%02X%02X%02X" % tuple([int(getattr(rgba, name) * 255) for name in ("red", "green", "blue")])
+
+
+def pixbuf_from_hex(value, width=128, height=16):
+	"""Create GDK pixbuf from color"""
+	pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, width, height)
+	pixbuf.fill(int(value[1:] + "FF", 16))
+	return pixbuf
 
 
 class GuiBase:
