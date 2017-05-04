@@ -1,5 +1,6 @@
-from gi.repository import Gtk, GdkPixbuf
+import os
 
+from gi.repository import Gtk, GdkPixbuf
 from aniwall.common import AttributeDict, GuiBase, hex_from_rgba
 
 
@@ -18,7 +19,7 @@ class MainWindow(GuiBase):
 		)
 		super().__init__("mainwindow.ui", "imagepage.ui", "colorpage.ui", elements=elements)
 
-		self.IMAGE_STORE = AttributeDict(INDEX=0, FILE=1)
+		self.IMAGE_STORE = AttributeDict(INDEX=0, FILE=1, NAME=2, LOCATION=3)
 		self.COLOR_STORE = AttributeDict(INDEX=0, NAME=1, HEX=2)
 		self.IMAGE_OFFSET = 12
 
@@ -49,11 +50,14 @@ class MainWindow(GuiBase):
 	def _build_store(self):
 		"""Build GUI stores"""
 		# image list store
-		for i, title in enumerate(("#", "File")):
+		# for i, title in enumerate(("#", "File")):
+		for i, title in enumerate(("#", "File", "Name", "Location")):
 			column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
 			self.gui["image-list-treeview"].append_column(column)
+			if i == self.IMAGE_STORE.FILE:
+				column.set_visible(False)
 
-		self.image_store = Gtk.ListStore(int, str)
+		self.image_store = Gtk.ListStore(int, str, str, str)
 		self.image_store_filter = self.image_store.filter_new()
 		self.image_store_filter.set_visible_func(self.image_search_filter_func)
 		self.gui["image-list-treeview"].set_model(self.image_store_filter)
@@ -70,7 +74,8 @@ class MainWindow(GuiBase):
 		"""Set list of SVG images for GUI treeview"""
 		self.image_store.clear()
 		for i, image in enumerate(self._parser.image_list):
-			self.image_store.append([i, image])
+			path, name = os.path.split(image)
+			self.image_store.append([i, image, os.path.splitext(name)[0], path])
 		self.gui["image-list-treeview"].set_cursor(0)
 
 	def update_color_list(self):

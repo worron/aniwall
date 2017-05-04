@@ -71,7 +71,7 @@
         <property name="hscrollbar_policy">never</property>
         <child>
           <object class="GtkTreeView" id="image-list-treeview">
-            <property name="headers_visible">False</property>
+            <!--<property name="headers_visible">False</property>-->
             <child internal-child="selection">
               <object class="GtkTreeSelection" id="image-list-selection"/>
             </child>
