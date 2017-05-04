@@ -31,3 +31,22 @@ class AttributeDict(dict):
 
 	def __setattr__(self, attr, value):
 		self[attr] = value
+
+
+class TreeViewData:
+	"""Gtk treeview data handler"""
+	def __init__(self, data):
+		self.column = AttributeDict()
+		self.visible = []
+		self.types = []
+		self.titles = []
+		self.visible = []
+		self.maintain = []
+
+		for i, item in enumerate(data):
+			self.column[item["literal"]] = i
+			self.types.append(item["type"])
+			self.titles.append(item["title"])
+			self.visible.append(item["visible"])
+			if "maintain" in item and item["maintain"]:
+				self.maintain.append(i)

@@ -1,7 +1,7 @@
 import os
 
 from gi.repository import Gtk, GdkPixbuf, GLib
-from aniwall.common import AttributeDict, GuiBase, hex_from_rgba, pixbuf_from_hex
+from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, pixbuf_from_hex
 
 
 class MainWindow(GuiBase):
@@ -19,8 +19,20 @@ class MainWindow(GuiBase):
 		)
 		super().__init__("mainwindow.ui", "imagepage.ui", "colorpage.ui", elements=elements)
 
-		self.IMAGE_STORE = AttributeDict(INDEX=0, FILE=1, NAME=2, LOCATION=3)
-		self.COLOR_STORE = AttributeDict(INDEX=0, NAME=1, COLOR=2, HEX=3)
+		self.image_view_data = TreeViewData((
+			dict(literal="INDEX", title="#", type=int, visible=False),
+			dict(literal="FILE", title="File", type=str, visible=False),
+			dict(literal="NAME", title="Name", type=str, visible=True),
+			dict(literal="LOCATION", title="Location", type=str, visible=True)
+		))
+
+		self.color_view_data = TreeViewData((
+			dict(literal="INDEX", title="#", type=int, visible=False),
+			dict(literal="NAME", title="Name", type=str, visible=True, maintain=True),
+			dict(literal="COLOR", title="Color", type=GdkPixbuf.Pixbuf, visible=True, maintain=True),
+			dict(literal="HEX", title="Hex", type=str, visible=True)
+		))
+
 		self.IMAGE_OFFSET = 12
 
 		self.last_size = None
@@ -50,27 +62,27 @@ class MainWindow(GuiBase):
 	def _build_store(self):
 		"""Build GUI stores"""
 		# image list store
-		for i, title in enumerate(("#", "File", "Name", "Location")):
+		for i, title in enumerate(self.image_view_data.titles):
 			column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
+			column.set_visible(self.image_view_data.visible[i])
 			self.gui["image-list-treeview"].append_column(column)
-			if i == self.IMAGE_STORE.FILE:
-				column.set_visible(False)
 
-		self.image_store = Gtk.ListStore(int, str, str, str)
+		self.image_store = Gtk.ListStore(*self.image_view_data.types)
 		self.image_store_filter = self.image_store.filter_new()
 		self.image_store_filter.set_visible_func(self.image_search_filter_func)
 		self.gui["image-list-treeview"].set_model(self.image_store_filter)
 
 		# image colors store
-		for i, title in enumerate(("#", "Name", "Color", "HEX")):
-			if i == self.COLOR_STORE.COLOR:
+		for i, title in enumerate(self.color_view_data.titles):
+			if i == self.color_view_data.column.COLOR:
 				column = Gtk.TreeViewColumn(title, Gtk.CellRendererPixbuf().new(), pixbuf=i)
 			else:
 				column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
 			column.set_property("resizable", True)
+			column.set_visible(self.color_view_data.visible[i])
 			self.gui["color-list-treeview"].append_column(column)
 
-		self.color_store = Gtk.ListStore(int, str, GdkPixbuf.Pixbuf, str)
+		self.color_store = Gtk.ListStore(*self.color_view_data.types)
 		self.gui["color-list-treeview"].set_model(self.color_store)
 
 	def update_image_list(self):
@@ -107,12 +119,12 @@ class MainWindow(GuiBase):
 		if not self.image_search_text:
 			return True
 		else:
-			return self.image_search_text.lower() in model[treeiter][self.IMAGE_STORE.FILE].lower()
+			return self.image_search_text.lower() in model[treeiter][self.image_view_data.column.FILE].lower()
 
 	def save_state(self):
 		"""Safe GUI widget state"""
 		for i, column in enumerate(self.gui["color-list-treeview"].get_columns()):
-			if i in (self.COLOR_STORE.NAME, self.COLOR_STORE.COLOR):
+			if i in (self.color_view_data.column.NAME, self.color_view_data.column.COLOR):
 				width = column.get_width()
 				key = "color-column-width-%d" % i
 				if self._mainapp.settings.range_check(key, GLib.Variant.new_int32(width)):
@@ -121,7 +133,7 @@ class MainWindow(GuiBase):
 	def restore_state(self):
 		"""Restore GUI widget state"""
 		for i, column in enumerate(self.gui["color-list-treeview"].get_columns()):
-			if i in (self.COLOR_STORE.NAME, self.COLOR_STORE.COLOR):
+			if i in (self.color_view_data.column.NAME, self.color_view_data.column.COLOR):
 				key = "color-column-width-%d" % i
 				width = self._mainapp.settings.get_int(key)
 				column.set_fixed_width(width)
@@ -131,7 +143,7 @@ class MainWindow(GuiBase):
 		model, sel = selection.get_selected()
 		if sel is not None:
 			# update image preview
-			file_ = model[sel][self.IMAGE_STORE.FILE]
+			file_ = model[sel][self.image_view_data.column.FILE]
 			self._parser.set_image(file_)
 			self.update_preview()
 			self.update_color_list()
@@ -165,10 +177,10 @@ class MainWindow(GuiBase):
 		if response == Gtk.ResponseType.OK:
 			hex_color = hex_from_rgba(color_dialog.get_rgba())
 			treeiter = self.color_store.get_iter(path)
-			color_index = self.color_store[treeiter][self.COLOR_STORE.INDEX]
+			color_index = self.color_store[treeiter][self.color_view_data.column.INDEX]
 
-			self.color_store[treeiter][self.COLOR_STORE.HEX] = hex_color
-			self.color_store[treeiter][self.COLOR_STORE.COLOR] = pixbuf_from_hex(hex_color)
+			self.color_store[treeiter][self.color_view_data.column.HEX] = hex_color
+			self.color_store[treeiter][self.color_view_data.column.COLOR] = pixbuf_from_hex(hex_color)
 			self._parser.current.change_color(hex_color, color_index)
 			self._parser.apply_changes()
 			self.update_preview()
