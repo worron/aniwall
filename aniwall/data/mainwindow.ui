@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+  <object class="GtkAdjustment" id="shift-x-spinbutton-adjustment">
+    <property name="upper">10000</property>
+    <property name="lower">-10000</property>
+    <property name="step_increment">5</property>
+  </object>
+  <object class="GtkAdjustment" id="shift-y-spinbutton-adjustment">
+    <property name="upper">10000</property>
+    <property name="lower">-10000</property>
+    <property name="step_increment">5</property>
+  </object>
+  <object class="GtkAdjustment" id="scale-spinbutton-adjustment">
+    <property name="upper">1.00</property>
+    <property name="lower">0.01</property>
+    <property name="step_increment">0.01</property>
+  </object>
   <object class="GtkApplicationWindow" id="window">
-    <property name="default_width">720</property>
-    <property name="default_height">720</property>
+    <property name="default_width">1200</property>
+    <property name="default_height">800</property>
     <property name="title">Aniwall</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="headerbar">
+        <property name="title">Aniwall</property>
         <property name="show-close-button">True</property>
-        <property name="decoration-layout">menu:close</property>
-        <child type="title">
-          <object class="GtkStackSwitcher" id="stackswitcher">
-            <property name="stack">stack</property>
-          </object>
-        </child>
+        k        <property name="decoration-layout">menu:close</property>
       </object>
     </child>
     <child>
@@ -25,19 +36,110 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkStack" id="stack">
-            <property name="transition-type">6</property>
-            <property name="transition-duration">500</property>
-            <property name="height_request">280</property>
+          <object class="GtkSeparator" id="separator-1">
+            <property name="margin_bottom">6</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="panel-box">
+            <property name="spacing">12</property>
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkSearchEntry" id="image-search-entry">
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="scale-spinbutton">
+                <property name="adjustment">scale-spinbutton-adjustment</property>
+                <property name="digits">2</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="shift-x-spinbutton">
+                <property name="adjustment">shift-y-spinbutton-adjustment</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="shift-y-spinbutton">
+                <property name="adjustment">shift-x-spinbutton-adjustment</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="separator-2">
+            <property name="margin_top">6</property>
+            <property name="margin_bottom">12</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="list-box">
+            <property name="orientation">horizontal</property>
+            <property name="height_request">200</property>
+            <property name="spacing">18</property>
+            <child>
+              <object class="GtkScrolledWindow" id="image-list-scrolledwindow">
+                <property name="hscrollbar_policy">never</property>
+                <child>
+                  <object class="GtkTreeView" id="image-list-treeview">
+                    <!--<property name="headers_visible">False</property>-->
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="image-list-selection"/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="color-list-scrolledwindow">
+                <property name="hscrollbar_policy">never</property>
+                <child>
+                  <object class="GtkTreeView" id="color-list-treeview">
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="color-list-selection"/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
           </packing>
         </child>
       </object>

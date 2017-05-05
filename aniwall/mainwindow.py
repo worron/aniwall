@@ -12,12 +12,12 @@ class MainWindow(GuiBase):
 
 		# load GUI
 		elements = (
-			"window", "headerbar", "stack", "image-box", "image-list-treeview", "image-list-selection",
+			"window", "headerbar", "image-box", "image-list-treeview", "image-list-selection",
 			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
 			"scale-spinbutton",
 		)
-		super().__init__("mainwindow.ui", "imagepage.ui", "colorpage.ui", elements=elements)
+		super().__init__("mainwindow.ui", elements=elements)
 
 		self.image_view_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
@@ -41,10 +41,6 @@ class MainWindow(GuiBase):
 
 		# set application main window
 		self.gui["window"].set_application(mainapp)
-
-		# construct stack
-		self.gui["stack"].add_titled(self.gui["image-box"], "images", "Images")
-		self.gui["stack"].add_titled(self.gui["color-box"], "colors", "Colors")
 
 		# signals
 		self.handler = {}
