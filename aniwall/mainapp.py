@@ -82,7 +82,6 @@ class MainApp(Gtk.Application):
 		# show window
 		self.mainwindow.gui["window"].show_all()
 		self.mainwindow.update_preview()
-		self.mainwindow.restore_state()
 
 	def do_command_line(self, command_line):
 		if not self.mainwindow:
@@ -97,7 +96,6 @@ class MainApp(Gtk.Application):
 		return 0
 
 	def do_shutdown(self):
-		self.mainwindow.save_state()
 		logger.info("Exit aniwall")
 		Gtk.Application.do_shutdown(self)
 

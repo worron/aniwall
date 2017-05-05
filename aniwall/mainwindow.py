@@ -1,6 +1,6 @@
 import os
 
-from gi.repository import Gtk, GdkPixbuf, GLib
+from gi.repository import Gtk, GdkPixbuf
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, pixbuf_from_hex
 
 
@@ -15,25 +15,27 @@ class MainWindow(GuiBase):
 			"window", "headerbar", "image-box", "image-list-treeview", "image-list-selection",
 			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
-			"scale-spinbutton",
+			"scale-spinbutton", "color-list-scrolledwindow",
 		)
 		super().__init__("mainwindow.ui", elements=elements)
 
 		self.image_view_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
 			dict(literal="FILE", title="File", type=str, visible=False),
-			dict(literal="NAME", title="Name", type=str, visible=True),
+			dict(literal="NAME", title="Image", type=str, visible=True),
 			dict(literal="LOCATION", title="Location", type=str, visible=True)
 		))
 
 		self.color_view_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
-			dict(literal="NAME", title="Name", type=str, visible=True, maintain=True),
+			dict(literal="NAME", title="Tag", type=str, visible=True, maintain=True),
 			dict(literal="COLOR", title="Color", type=GdkPixbuf.Pixbuf, visible=True, maintain=True),
-			dict(literal="HEX", title="Hex", type=str, visible=True)
+			dict(literal="HEX", title="Hex", type=str, visible=False)
 		))
 
 		self.IMAGE_OFFSET = 12
+		self.MIN_COLUMN_WIDTH = 120
+		self.pixbuf_pattern_width = self.MIN_COLUMN_WIDTH - 24
 
 		self.last_size = None
 		self.image_search_text = None
@@ -49,7 +51,7 @@ class MainWindow(GuiBase):
 		)
 
 		self.gui["color-list-treeview"].connect("row_activated", self._on_color_activated)
-		self.gui["window"].connect("check-resize", self._on_window_resize)
+		self.gui["window"].connect("size-allocate", self._on_image_resize)
 		self.gui["image-search-entry"].connect("activate", self._on_image_search_activate)
 		self.gui["shift-x-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 0)
 		self.gui["shift-y-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 1)
@@ -61,6 +63,7 @@ class MainWindow(GuiBase):
 		for i, title in enumerate(self.image_view_data.titles):
 			column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
 			column.set_visible(self.image_view_data.visible[i])
+			column.set_min_width(self.MIN_COLUMN_WIDTH)
 			self.gui["image-list-treeview"].append_column(column)
 
 		self.image_store = Gtk.ListStore(*self.image_view_data.types)
@@ -69,12 +72,17 @@ class MainWindow(GuiBase):
 		self.gui["image-list-treeview"].set_model(self.image_store_filter)
 
 		# image colors store
+		max_column_width = self.gui["color-list-scrolledwindow"].get_property("width_request") - self.MIN_COLUMN_WIDTH
 		for i, title in enumerate(self.color_view_data.titles):
 			if i == self.color_view_data.column.COLOR:
 				column = Gtk.TreeViewColumn(title, Gtk.CellRendererPixbuf().new(), pixbuf=i)
 			else:
 				column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
-			column.set_property("resizable", True)
+
+			column.set_resizable(True)
+			column.set_max_width(max_column_width)
+			column.set_min_width(self.MIN_COLUMN_WIDTH)
+
 			column.set_visible(self.color_view_data.visible[i])
 			self.gui["color-list-treeview"].append_column(column)
 
@@ -93,7 +101,7 @@ class MainWindow(GuiBase):
 		"""Set color palette for GUI treeview"""
 		self.color_store.clear()
 		for line in self._parser.current.get_palette():
-			pixbuf = pixbuf_from_hex(line["hex"])
+			pixbuf = pixbuf_from_hex(line["hex"], width=self.pixbuf_pattern_width)
 			self.color_store.append([line["index"], line["name"], pixbuf, line["hex"]])
 
 		self.gui["color-list-treeview"].set_cursor(0)
@@ -117,23 +125,6 @@ class MainWindow(GuiBase):
 		else:
 			return self.image_search_text.lower() in model[treeiter][self.image_view_data.column.FILE].lower()
 
-	def save_state(self):
-		"""Safe GUI widget state"""
-		for i, column in enumerate(self.gui["color-list-treeview"].get_columns()):
-			if i in (self.color_view_data.column.NAME, self.color_view_data.column.COLOR):
-				width = column.get_width()
-				key = "color-column-width-%d" % i
-				if self._mainapp.settings.range_check(key, GLib.Variant.new_int32(width)):
-					self._mainapp.settings.set_int(key, width)
-
-	def restore_state(self):
-		"""Restore GUI widget state"""
-		for i, column in enumerate(self.gui["color-list-treeview"].get_columns()):
-			if i in (self.color_view_data.column.NAME, self.color_view_data.column.COLOR):
-				key = "color-column-width-%d" % i
-				width = self._mainapp.settings.get_int(key)
-				column.set_fixed_width(width)
-
 	def _on_image_selection_changed(self, selection):
 		"""GUI handler"""
 		model, sel = selection.get_selected()
@@ -149,9 +140,9 @@ class MainWindow(GuiBase):
 			self.gui["shift-y-spinbutton"].set_value(float(self._parser.current.shift[1]))
 
 	# noinspection PyUnusedLocal
-	def _on_window_resize(self, *args):
+	def _on_image_resize(self, window, rectangle):
 		"""GUI handler"""
-		size = self.gui["window"].get_size()
+		size = [rectangle.width, rectangle.height]
 		if self.last_size != size:
 			self.last_size = size
 			self.update_preview()
@@ -176,7 +167,9 @@ class MainWindow(GuiBase):
 			color_index = self.color_store[treeiter][self.color_view_data.column.INDEX]
 
 			self.color_store[treeiter][self.color_view_data.column.HEX] = hex_color
-			self.color_store[treeiter][self.color_view_data.column.COLOR] = pixbuf_from_hex(hex_color)
+			self.color_store[treeiter][self.color_view_data.column.COLOR] = pixbuf_from_hex(
+				hex_color, width=self.pixbuf_pattern_width
+			)
 			self._parser.current.change_color(hex_color, color_index)
 			self._parser.apply_changes()
 			self.update_preview()

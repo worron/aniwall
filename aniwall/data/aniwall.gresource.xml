@@ -2,8 +2,6 @@
 <gresources>
   <gresource prefix="/com/github/worron/aniwall">
     <file preprocess="xml-stripblanks">mainwindow.ui</file>
-    <file preprocess="xml-stripblanks">imagepage.ui</file>
-    <file preprocess="xml-stripblanks">colorpage.ui</file>
     <file preprocess="xml-stripblanks">menu.ui</file>
   </gresource>
 </gresources>
