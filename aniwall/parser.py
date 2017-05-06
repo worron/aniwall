@@ -152,8 +152,9 @@ class ImageParser:
 		"""Preview image changes"""
 		self.current.rebuild(self.temporary.name)
 
-	def export_image(self, type_="png"):
+	def export_image(self):
 		"""GUI handler"""
+		type_ = self._mainapp.settings.get_string("export-type")
 		file_ = os.path.join(self._mainapp.path.export, self.current.name + "." + type_)
 		logger.debug("Exporting image\n%s" % file_)
 

@@ -4,5 +4,15 @@
     <key name="export-path" type="s">
       <default>''</default>
     </key>
+    <key name="export-type" type="s">
+      <choices>
+        <choice value='png'/>
+        <choice value='jpeg'/>
+        <choice value='tiff'/>
+        <choice value='ico'/>
+        <choice value='bmp'/>
+      </choices>
+      <default>'png'</default>
+    </key>
   </schema>
 </schemalist>
