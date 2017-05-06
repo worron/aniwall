@@ -24,17 +24,42 @@ class MainApp(Gtk.Application):
 
 	def _do_startup(self):
 		"""
-		Main initialization function.
+		Initialize application structure.
 		Use this one to make all setup AFTER command line parsing completed.
 		"""
-		logger.info("Start aniwall")
+		# set application actions
+		action = Gio.SimpleAction.new("about", None)
+		action.connect("activate", self.on_about)
+		self.add_action(action)
 
+		action = Gio.SimpleAction.new("quit", None)
+		action.connect("activate", self.on_quit)
+		self.add_action(action)
+
+		# init application modules
+		self.parser = ImageParser(self)
+		self.mainwindow = MainWindow(self)
+
+		self.mainwindow.update_image_list()
+
+		# set application menu
+		builder = Gtk.Builder.new_from_resource("/com/github/worron/aniwall/menu.ui")
+		self.set_app_menu(builder.get_object("app-menu"))
+
+		# show window
+		self.mainwindow.gui["window"].show_all()
+		self.mainwindow.update_preview()
+
+	def _load_resources(self):
+		"""
+		Initialize resources.
+		Use this one to make all setup AFTER command line parsing completed.
+		"""
 		# Set data files locations
 		self.path = AttributeDict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
 			images=os.path.join(os.path.abspath(os.path.dirname(__file__)), "images"),
-			user=os.path.expanduser("~/.config/aniwall"),
-			export=os.path.expanduser("~"),
+			user=os.path.expanduser("~/.config/aniwall")
 		)
 
 		# init resources
@@ -64,32 +89,7 @@ class MainApp(Gtk.Application):
 		# set export path
 		export_path = self.settings.get_string("export-path")
 		if not export_path:
-			self.settings.set_string("export-path", self.path.export)
-		else:
-			self.path.export = export_path
-
-		# set application actions
-		action = Gio.SimpleAction.new("about", None)
-		action.connect("activate", self.on_about)
-		self.add_action(action)
-
-		action = Gio.SimpleAction.new("quit", None)
-		action.connect("activate", self.on_quit)
-		self.add_action(action)
-
-		# init application modules
-		self.parser = ImageParser(self)
-		self.mainwindow = MainWindow(self)
-
-		self.mainwindow.update_image_list()
-
-		# set application menu
-		builder = Gtk.Builder.new_from_resource("/com/github/worron/aniwall/menu.ui")
-		self.set_app_menu(builder.get_object("app-menu"))
-
-		# show window
-		self.mainwindow.gui["window"].show_all()
-		self.mainwindow.update_preview()
+			self.settings.set_string("export-path", os.path.expanduser("~"))
 
 	def do_command_line(self, command_line):
 		if not self.mainwindow:
@@ -99,14 +99,13 @@ class MainApp(Gtk.Application):
 			logger.setLevel(log_level)
 
 			# init app structure
+			logger.info("Start aniwall application")
+			self._load_resources()
 			self._do_startup()
 
 		return 0
 
 	def do_shutdown(self):
-		logger.debug("Saving program data")
-		self.settings.set_string("export-path", self.path.export)
-
 		logger.info("Exit aniwall")
 		Gtk.Application.do_shutdown(self)
 

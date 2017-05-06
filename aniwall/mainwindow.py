@@ -201,7 +201,7 @@ class MainWindow(GuiBase):
 			"Export image as", self.gui["window"], Gtk.FileChooserAction.SAVE,
 			(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
 		)
-		dialog.set_current_folder(self._mainapp.path.export)
+		dialog.set_current_folder(self._mainapp.settings.get_string("export-path"))
 		dialog.set_current_name(self._parser.current.name)
 
 		response = dialog.run()
@@ -210,7 +210,7 @@ class MainWindow(GuiBase):
 			name = os.path.splitext(name)[0]
 			# noinspection SpellCheckingInspection
 			logger.debug("New export settings\npath: %s\nname: %s" % (path, name))
-			self._mainapp.path.export = path
+			self._mainapp.settings.set_string("export-path", path)
 			self._parser.current.name = name
 			self._parser.export_image()
 

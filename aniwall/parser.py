@@ -155,7 +155,7 @@ class ImageParser:
 	def export_image(self):
 		"""GUI handler"""
 		type_ = self._mainapp.settings.get_string("export-type")
-		file_ = os.path.join(self._mainapp.path.export, self.current.name + "." + type_)
+		file_ = os.path.join(self._mainapp.settings.get_string("export-path"), self.current.name + "." + type_)
 		logger.debug("Exporting image\n%s" % file_)
 
 		pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.temporary.name)
