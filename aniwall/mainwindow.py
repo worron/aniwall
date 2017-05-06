@@ -1,6 +1,7 @@
 import os
 
 from gi.repository import Gtk, GdkPixbuf
+from aniwall.logger import logger
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, pixbuf_from_hex
 
 
@@ -15,7 +16,7 @@ class MainWindow(GuiBase):
 			"window", "headerbar", "image-box", "image-list-treeview", "image-list-selection",
 			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
-			"scale-spinbutton", "color-list-scrolledwindow",
+			"scale-spinbutton", "color-list-scrolledwindow", "export-button", "export-as-button",
 		)
 		super().__init__("mainwindow.ui", elements=elements)
 
@@ -37,7 +38,6 @@ class MainWindow(GuiBase):
 		self.MIN_COLUMN_WIDTH = 120
 		self.pixbuf_pattern_width = self.MIN_COLUMN_WIDTH - 24
 
-		self.last_size = None
 		self.image_search_text = None
 		self._build_store()
 
@@ -56,6 +56,8 @@ class MainWindow(GuiBase):
 		self.gui["shift-x-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 0)
 		self.gui["shift-y-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 1)
 		self.gui["scale-spinbutton"].connect("value-changed", self._on_scale_spinbutton_value_changed)
+		self.gui["export-button"].connect("clicked", self._on_export_button_clicked)
+		self.gui["export-as-button"].connect("clicked", self._on_export_as_button_clicked)
 
 	def _build_store(self):
 		"""Build GUI stores"""
@@ -142,10 +144,7 @@ class MainWindow(GuiBase):
 	# noinspection PyUnusedLocal
 	def _on_image_resize(self, window, rectangle):
 		"""GUI handler"""
-		size = [rectangle.width, rectangle.height]
-		if self.last_size != size:
-			self.last_size = size
-			self.update_preview()
+		self.update_preview()
 
 	# noinspection PyUnusedLocal
 	def _on_image_search_activate(self, *args):
@@ -189,3 +188,30 @@ class MainWindow(GuiBase):
 		self._parser.current.change_scale(value)
 		self._parser.apply_changes()
 		self.update_preview()
+
+	# noinspection PyUnusedLocal
+	def _on_export_button_clicked(self, button):
+		"""GUI handler"""
+		self._parser.export_image()
+
+	# noinspection PyUnusedLocal
+	def _on_export_as_button_clicked(self, button):
+		"""GUI handler"""
+		dialog = Gtk.FileChooserDialog(
+			"Export image as", self.gui["window"], Gtk.FileChooserAction.SAVE,
+			(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+		)
+		dialog.set_current_folder(self._mainapp.path.export)
+		dialog.set_current_name(self._parser.current.name)
+
+		response = dialog.run()
+		if response == Gtk.ResponseType.OK:
+			path, name = os.path.split(dialog.get_filename())
+			name = os.path.splitext(name)[0]
+			# noinspection SpellCheckingInspection
+			logger.debug("New export settings\npath: %s\nname: %s" % (path, name))
+			self._mainapp.path.export = path
+			self._parser.current.name = name
+			self._parser.export_image()
+
+		dialog.destroy()

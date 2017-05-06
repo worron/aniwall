@@ -57,6 +57,43 @@
               </packing>
             </child>
             <child>
+              <object class="GtkButton" id="export-button">
+                <child>
+                  <object class="GtkImage" id="save-image">
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">document-save-symbolic</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="export-as-button">
+                <child>
+                  <object class="GtkImage" id="save-as-image">
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">document-save-as-symbolic</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+
+            <child>
               <object class="GtkSpinButton" id="shift-y-spinbutton">
                 <property name="adjustment">shift-y-spinbutton-adjustment</property>
               </object>

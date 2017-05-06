@@ -33,7 +33,8 @@ class MainApp(Gtk.Application):
 		self.path = AttributeDict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
 			images=os.path.join(os.path.abspath(os.path.dirname(__file__)), "images"),
-			user=os.path.expanduser("~/.config/aniwall")
+			user=os.path.expanduser("~/.config/aniwall"),
+			export=os.path.expanduser("~"),
 		)
 
 		# init resources
@@ -59,6 +60,13 @@ class MainApp(Gtk.Application):
 		)
 		schema = schema_source.lookup("com.github.worron.aniwall", False)
 		self.settings = Gio.Settings.new_full(schema, None, None)
+
+		# set export path
+		export_path = self.settings.get_string("export-path")
+		if not export_path:
+			self.settings.set_string("export-path", self.path.export)
+		else:
+			self.path.export = export_path
 
 		# set application actions
 		action = Gio.SimpleAction.new("about", None)
@@ -96,6 +104,9 @@ class MainApp(Gtk.Application):
 		return 0
 
 	def do_shutdown(self):
+		logger.debug("Saving program data")
+		self.settings.set_string("export-path", self.path.export)
+
 		logger.info("Exit aniwall")
 		Gtk.Application.do_shutdown(self)
 

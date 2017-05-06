@@ -5,6 +5,7 @@ import shutil
 
 from itertools import count
 from lxml import etree
+from gi.repository import GdkPixbuf
 from aniwall.logger import logger
 
 
@@ -13,6 +14,8 @@ class ImageData:
 	def __init__(self, file_, tree):
 		self.file = file_
 		self.tree = tree
+		if file_ is not None:
+			self.name = os.path.splitext((os.path.split(file_)[1]))[0]
 
 		self.bg = None
 		self.colors = []
@@ -148,3 +151,11 @@ class ImageParser:
 	def apply_changes(self):
 		"""Preview image changes"""
 		self.current.rebuild(self.temporary.name)
+
+	def export_image(self, type_="png"):
+		"""GUI handler"""
+		file_ = os.path.join(self._mainapp.path.export, self.current.name + "." + type_)
+		logger.debug("Exporting image\n%s" % file_)
+
+		pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.temporary.name)
+		pixbuf.savev(file_, type_, [], [])
