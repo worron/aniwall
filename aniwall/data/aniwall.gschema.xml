@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="com.github.worron.aniwall" path="/com/github/worron/aniwall/">
+    <key name="images-location-list" type="as">
+      <default>[]</default>
+    </key>
     <key name="export-path" type="s">
       <default>''</default>
     </key>

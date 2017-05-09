@@ -30,7 +30,6 @@ class MainApp(Gtk.Application):
 		# Set data files locations
 		self.path = AttributeDict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
-			images=os.path.join(os.path.abspath(os.path.dirname(__file__)), "images"),
 			user=os.path.expanduser("~/.config/aniwall")
 		)
 		if logger.is_debug():
@@ -64,10 +63,15 @@ class MainApp(Gtk.Application):
 		schema = schema_source.lookup("com.github.worron.aniwall", False)
 		self.settings = Gio.Settings.new_full(schema, None, None)
 
-		# set export path
-		export_path = self.settings.get_string("export-path")
-		if not export_path:
+		# set initial settings on first run
+		if not self.settings.get_string("export-path"):
 			self.settings.set_string("export-path", os.path.expanduser("~"))
+
+		if not self.settings.get_strv("images-location-list"):
+			self.settings.set_strv(
+				"images-location-list",
+				[os.path.join(os.path.abspath(os.path.dirname(__file__)), "images")]
+			)
 
 		if logger.is_debug():
 			settings_list = "\n".join(k + ": " + str(self.settings.get_value(k)) for k in schema.list_keys())
@@ -96,7 +100,8 @@ class MainApp(Gtk.Application):
 		from aniwall.mainwindow import MainWindow
 
 		# init application modules
-		self.parser = ImageParser(self)
+		self.parser = ImageParser(self, os.path.join(self.path.data, "test.svg"))
+		self.parser.load_images(*self.settings.get_strv("images-location-list"))
 		self.mainwindow = MainWindow(self)
 
 		self.mainwindow.update_image_list()

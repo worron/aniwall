@@ -97,41 +97,13 @@ class ImageParser:
 	Image manager.
 	Read and edit SVG images.
 	"""
-	def __init__(self, mainapp):
+	def __init__(self, mainapp, image_sample):
 		self._mainapp = mainapp
+		self._testimage = image_sample
+		self.temporary = tempfile.NamedTemporaryFile()
 		self.parser = etree.XMLParser(remove_blank_text=True)
 		self.current = None
-		self.temporary = tempfile.NamedTemporaryFile()
-		self.test_image = os.path.join(self._mainapp.path.data, "test.svg")
-
-		self.image_list = sorted(self._load_svg(self._mainapp.path.images))
-
-	@debuginfo(output_log=False)
-	def _load_svg(self, *directories):
-		"""Find all formatted SVG images in directories"""
-		imagepack = []
-		for path in directories:
-			for root, _, files in os.walk(path):
-				svg_files = [os.path.join(root, name) for name in files if name.endswith('.svg')]
-				# check if images formatted correctly
-				for file_ in svg_files:
-					try:
-						temp_data = self._load_image_data(None, file_)
-						if (
-							temp_data.bg is None
-							or any([item is None for item in temp_data.colors])
-							or any([item is None for item in temp_data.shift])
-						):
-							raise Exception("Missed tag parameter")
-						imagepack.append(file_)
-					except Exception:
-						logger.exception("Broken image file:\n%s" % file_)
-
-		logger.debug("%s image files was found." % len(imagepack))
-		if not imagepack:
-			logger.warning("No image was found.\nLoad test sample.")
-			imagepack.append(self.test_image)
-		return imagepack
+		self.image_list = []
 
 	def _load_image_data(self, file_, source):
 		"""Read image settings from SVG tags"""
@@ -157,6 +129,34 @@ class ImageParser:
 			imagedata.set_color(tag, id_)
 
 		return imagedata
+
+	@debuginfo(output_log=False)
+	def load_images(self, *directories):
+		"""Find all formatted SVG images in directories"""
+		imagepack = []
+		for path in directories:
+			for root, _, files in os.walk(path):
+				svg_files = [os.path.join(root, name) for name in files if name.endswith('.svg')]
+				# check if images formatted correctly
+				for file_ in svg_files:
+					try:
+						temp_data = self._load_image_data(None, file_)
+						if (
+							temp_data.bg is None
+							or any([item is None for item in temp_data.colors])
+							or any([item is None for item in temp_data.shift])
+						):
+							raise Exception("Missed tag parameter")
+						imagepack.append(file_)
+					except Exception:
+						logger.exception("Broken image file:\n%s" % file_)
+
+		logger.debug("%s image files was found." % len(imagepack))
+		if not imagepack:
+			logger.warning("No image was found.\nLoad test sample.")
+			imagepack.append(self._testimage)
+
+		self.image_list = sorted(imagepack)
 
 	@debuginfo()
 	def load_image_data(self, file_, source):
