@@ -92,7 +92,6 @@
                 <property name="pack_type">end</property>
               </packing>
             </child>
-
             <child>
               <object class="GtkSpinButton" id="shift-y-spinbutton">
                 <property name="adjustment">shift-y-spinbutton-adjustment</property>
@@ -190,7 +189,7 @@
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
           </packing>
         </child>
