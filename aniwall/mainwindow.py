@@ -1,7 +1,7 @@
 import os
 
 from gi.repository import Gtk, GdkPixbuf
-from aniwall.logger import logger
+from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, pixbuf_from_hex
 
 
@@ -18,7 +18,7 @@ class MainWindow(GuiBase):
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
 			"scale-spinbutton", "color-list-scrolledwindow", "export-button", "export-as-button",
 		)
-		super().__init__("mainwindow.ui", elements=elements)
+		super().__init__("mainwindow.ui", elements=elements, path=self._mainapp.resource_path)
 
 		self.image_view_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
@@ -70,7 +70,7 @@ class MainWindow(GuiBase):
 
 		self.image_store = Gtk.ListStore(*self.image_view_data.types)
 		self.image_store_filter = self.image_store.filter_new()
-		self.image_store_filter.set_visible_func(self.image_search_filter_func)
+		self.image_store_filter.set_visible_func(self._image_search_filter_func)
 		self.gui["image-list-treeview"].set_model(self.image_store_filter)
 
 		# image colors store
@@ -91,6 +91,7 @@ class MainWindow(GuiBase):
 		self.color_store = Gtk.ListStore(*self.color_view_data.types)
 		self.gui["color-list-treeview"].set_model(self.color_store)
 
+	@debuginfo(False, False)
 	def update_image_list(self):
 		"""Set list of SVG images for GUI treeview"""
 		self.image_store.clear()
@@ -99,6 +100,7 @@ class MainWindow(GuiBase):
 			self.image_store.append([i, image, os.path.splitext(name)[0], path])
 		self.gui["image-list-treeview"].set_cursor(0)
 
+	@debuginfo(False, False)
 	def update_color_list(self):
 		"""Set color palette for GUI treeview"""
 		self.color_store.clear()
@@ -120,13 +122,14 @@ class MainWindow(GuiBase):
 			self.gui["preview"].set_from_pixbuf(pixbuf)
 
 	# noinspection PyUnusedLocal
-	def image_search_filter_func(self, model, treeiter, data):
+	def _image_search_filter_func(self, model, treeiter, data):
 		"""Function to filter images list by search text"""
 		if not self.image_search_text:
 			return True
 		else:
 			return self.image_search_text.lower() in model[treeiter][self.image_view_data.column.FILE].lower()
 
+	@debuginfo(False, False)
 	def _on_image_selection_changed(self, selection):
 		"""GUI handler"""
 		model, sel = selection.get_selected()
@@ -147,6 +150,7 @@ class MainWindow(GuiBase):
 		self.update_preview()
 
 	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
 	def _on_image_search_activate(self, *args):
 		"""GUI handler"""
 		self.image_search_text = self.gui["image-search-entry"].get_text()
@@ -155,6 +159,7 @@ class MainWindow(GuiBase):
 			self.gui["image-list-treeview"].set_cursor(0)
 
 	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
 	def _on_color_activated(self, tree, path, column):
 		"""GUI handler"""
 		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._mainapp.mainwindow.gui["window"], use_alpha=False)
@@ -164,6 +169,7 @@ class MainWindow(GuiBase):
 			hex_color = hex_from_rgba(color_dialog.get_rgba())
 			treeiter = self.color_store.get_iter(path)
 			color_index = self.color_store[treeiter][self.color_view_data.column.INDEX]
+			logger.debug("New color %s in line %s", hex_color, color_index)
 
 			self.color_store[treeiter][self.color_view_data.column.HEX] = hex_color
 			self.color_store[treeiter][self.color_view_data.column.COLOR] = pixbuf_from_hex(
@@ -175,6 +181,7 @@ class MainWindow(GuiBase):
 
 		color_dialog.destroy()
 
+	@debuginfo(False, False)
 	def _on_shift_spinbutton_value_changed(self, button, index):
 		"""GUI handler"""
 		value = button.get_value()
@@ -182,6 +189,7 @@ class MainWindow(GuiBase):
 		self._parser.apply_changes()
 		self.update_preview()
 
+	@debuginfo(False, False)
 	def _on_scale_spinbutton_value_changed(self, button):
 		"""GUI handler"""
 		value = "%.2f" % button.get_value()
@@ -190,11 +198,13 @@ class MainWindow(GuiBase):
 		self.update_preview()
 
 	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
 	def _on_export_button_clicked(self, button):
 		"""GUI handler"""
 		self._parser.export_image()
 
 	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
 	def _on_export_as_button_clicked(self, button):
 		"""GUI handler"""
 		dialog = Gtk.FileChooserDialog(
@@ -208,8 +218,7 @@ class MainWindow(GuiBase):
 		if response == Gtk.ResponseType.OK:
 			path, name = os.path.split(dialog.get_filename())
 			name = os.path.splitext(name)[0]
-			# noinspection SpellCheckingInspection
-			logger.debug("New export settings\npath: %s\nname: %s" % (path, name))
+			logger.debug("New export settings: [path: %s], [name: %s]" % (path, name))
 			self._mainapp.settings.set_string("export-path", path)
 			self._parser.current.name = name
 			self._parser.export_image()

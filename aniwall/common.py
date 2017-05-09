@@ -15,9 +15,8 @@ def pixbuf_from_hex(value, width=128, height=16):
 
 class GuiBase:
 	"""Base for Gtk widget set created with builder"""
-	resource_path = "/com/github/worron/aniwall/"
-
-	def __init__(self, *files, elements=()):
+	def __init__(self, *files, elements=(), path=None):
+		self.resource_path = path
 		self.builder = Gtk.Builder()
 		for file_ in files:
 			self.builder.add_from_resource(self.resource_path + file_)

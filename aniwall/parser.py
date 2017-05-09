@@ -6,7 +6,7 @@ import shutil
 from itertools import count
 from lxml import etree
 from gi.repository import GdkPixbuf
-from aniwall.logger import logger
+from aniwall.logger import logger, debuginfo
 
 
 class ImageData:
@@ -23,6 +23,13 @@ class ImageData:
 		self.shift = [0, 0]
 		self.scale = "1.00"
 
+	def __repr__(self):
+		return "<%s> %s" % (
+			self.__module__ + "." + self.__class__.__name__,
+			str({k: v for k, v in self.__dict__.items() if k not in ("tags", "tree")})
+		)
+
+	@debuginfo(input_log=False)
 	def get_palette(self):
 		"""Build full list of colors"""
 		palette = [dict(index=0, name="Background", hex=self.bg)]
@@ -77,6 +84,13 @@ class ImageData:
 
 		self.tree.write(file_, pretty_print=True)
 
+		if logger.is_debug:
+			tag_info = "Current image parameters "
+			for name, tag in self.tags.items():
+				attr = "transform" if name == "transform" else "fill"
+				tag_info += "[%s: %s], " % (name, tag.get(attr))
+			logger.debug(tag_info)
+
 
 class ImageParser:
 	"""
@@ -90,9 +104,10 @@ class ImageParser:
 		self.temporary = tempfile.NamedTemporaryFile()
 		self.test_image = os.path.join(self._mainapp.path.data, "test.svg")
 
-		self.image_list = sorted(self.load_svg(self._mainapp.path.images))
+		self.image_list = sorted(self._load_svg(self._mainapp.path.images))
 
-	def load_svg(self, *directories):
+	@debuginfo(output_log=False)
+	def _load_svg(self, *directories):
 		"""Find all formatted SVG images in directories"""
 		imagepack = []
 		for path in directories:
@@ -143,20 +158,28 @@ class ImageParser:
 
 		return imagedata
 
+	@debuginfo()
+	def load_image_data(self, file_, source):
+		"""Read image settings from SVG tags"""
+		return self._load_image_data(file_, source)
+
+	@debuginfo(output_log=False)
 	def set_image(self, file_):
 		"""Select currently active image"""
 		shutil.copy2(file_, self.temporary.name)  # create temporary copy
-		self.current = self._load_image_data(file_, self.temporary.name)  # parse SVG data
+		self.current = self.load_image_data(file_, self.temporary.name)  # parse SVG data
 
+	@debuginfo(False, False)
 	def apply_changes(self):
 		"""Preview image changes"""
 		self.current.rebuild(self.temporary.name)
 
+	@debuginfo(False, False)
 	def export_image(self):
 		"""GUI handler"""
 		type_ = self._mainapp.settings.get_string("export-type")
 		file_ = os.path.join(self._mainapp.settings.get_string("export-path"), self.current.name + "." + type_)
-		logger.debug("Exporting image\n%s" % file_)
+		logger.debug("Exporting image: %s" % file_)
 
 		pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.temporary.name)
 		pixbuf.savev(file_, type_, [], [])

@@ -2,10 +2,8 @@ import os
 import shutil
 
 from gi.repository import GLib, Gio, Gtk
-from aniwall.common import AttributeDict
-from aniwall.mainwindow import MainWindow
 from aniwall.logger import logger
-from aniwall.parser import ImageParser
+from aniwall.common import AttributeDict
 
 
 class MainApp(Gtk.Application):
@@ -16,61 +14,41 @@ class MainApp(Gtk.Application):
 		)
 		self.is_local = is_local
 		self.mainwindow = None
+		self.resource_path = "/com/github/worron/aniwall/"
 
 		self.add_main_option(
 			"log-level", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.STRING,
 			"Set log level", "LOG_LEVEL"
 		)
 
-	def _do_startup(self):
-		"""
-		Initialize application structure.
-		Use this one to make all setup AFTER command line parsing completed.
-		"""
-		# set application actions
-		action = Gio.SimpleAction.new("about", None)
-		action.connect("activate", self.on_about)
-		self.add_action(action)
-
-		action = Gio.SimpleAction.new("quit", None)
-		action.connect("activate", self.on_quit)
-		self.add_action(action)
-
-		# init application modules
-		self.parser = ImageParser(self)
-		self.mainwindow = MainWindow(self)
-
-		self.mainwindow.update_image_list()
-
-		# set application menu
-		builder = Gtk.Builder.new_from_resource("/com/github/worron/aniwall/menu.ui")
-		self.set_app_menu(builder.get_object("app-menu"))
-
-		# show window
-		self.mainwindow.gui["window"].show_all()
-		self.mainwindow.update_preview()
-
 	def _load_resources(self):
 		"""
 		Initialize resources.
 		Use this one to make all setup AFTER command line parsing completed.
 		"""
+		logger.info("Loading resources...")
 		# Set data files locations
 		self.path = AttributeDict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
 			images=os.path.join(os.path.abspath(os.path.dirname(__file__)), "images"),
 			user=os.path.expanduser("~/.config/aniwall")
 		)
+		if logger.is_debug():
+			logger.debug("Data files location:\n%s", "\n".join(k + ": " + v for k, v in self.path.items()))
 
 		# init resources
-		if self.is_local:
-			resource_path = os.path.join(self.path.data, "aniwall.gresource")
-			resource = Gio.Resource.load(resource_path)
-			# noinspection PyProtectedMember
-			resource._register()
+		resource_path = os.path.join(self.path.data, "aniwall.gresource")
+		resource = Gio.Resource.load(resource_path)
+		# noinspection PyProtectedMember
+		resource._register()
+
+		if logger.is_debug():
+			resource_files = "\n".join(resource.enumerate_children(self.resource_path, Gio.ResourceLookupFlags.NONE))
+			logger.debug("List of loaded resources files:\n%s" % resource_files)
 
 		# init settings
 		if not os.path.exists(self.path.user):
+			logger.info("Creating user config location:\n%s" % self.path.user)
 			os.makedirs(self.path.user)
 
 		user_schema = os.path.join(self.path.user, "gschemas.compiled")
@@ -91,6 +69,49 @@ class MainApp(Gtk.Application):
 		if not export_path:
 			self.settings.set_string("export-path", os.path.expanduser("~"))
 
+		if logger.is_debug():
+			settings_list = "\n".join(k + ": " + str(self.settings.get_value(k)) for k in schema.list_keys())
+			logger.debug("Current settings:\n%s", settings_list)
+
+		logger.info("Loading resources completed")
+
+	def _do_startup(self):
+		"""
+		Initialize application structure.
+		Use this one to make all setup AFTER command line parsing completed.
+		"""
+		logger.info("Application modules initialization...")
+
+		# set application actions
+		action = Gio.SimpleAction.new("about", None)
+		action.connect("activate", self.on_about)
+		self.add_action(action)
+
+		action = Gio.SimpleAction.new("quit", None)
+		action.connect("activate", self.on_quit)
+		self.add_action(action)
+
+		# lazy import application modules
+		from aniwall.parser import ImageParser
+		from aniwall.mainwindow import MainWindow
+
+		# init application modules
+		self.parser = ImageParser(self)
+		self.mainwindow = MainWindow(self)
+
+		self.mainwindow.update_image_list()
+
+		# set application menu
+		builder = Gtk.Builder.new_from_resource("/com/github/worron/aniwall/menu.ui")
+		self.set_app_menu(builder.get_object("app-menu"))
+
+		logger.info("Application modules initialization complete")
+
+		# show window
+		logger.info("Application GUI startup")
+		self.mainwindow.gui["window"].show_all()
+		self.mainwindow.update_preview()
+
 	def do_command_line(self, command_line):
 		if not self.mainwindow:
 			# set log level
@@ -106,7 +127,7 @@ class MainApp(Gtk.Application):
 		return 0
 
 	def do_shutdown(self):
-		logger.info("Exit aniwall")
+		logger.info("Exit aniwall application")
 		Gtk.Application.do_shutdown(self)
 
 	# noinspection PyUnusedLocal,PyUnusedLocal
