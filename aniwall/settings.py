@@ -1,3 +1,4 @@
+from gi.repository import Gtk
 from aniwall.common import GuiBase, TreeViewData
 from aniwall.logger import logger, debuginfo
 
@@ -9,7 +10,8 @@ class SettingsWindow(GuiBase):
 
 		# load GUI
 		elements = (
-			"window", "image-location-add-button", "image-location-add-button", "image-location-treeview"
+			"window", "image-location-add-button", "image-location-add-button", "image-location-treeview",
+			"image-location-add-button", "image-location-remove-button", "image-location-selection",
 		)
 		super().__init__("settings.ui", elements=elements, path=self._mainapp.resource_path)
 
@@ -26,6 +28,46 @@ class SettingsWindow(GuiBase):
 
 		# signals
 		self.gui["window"].connect("delete-event", self.hide)
+		self.gui["image-location-add-button"].connect("clicked", self._on_image_location_add_button_clicked)
+		self.gui["image-location-remove-button"].connect("clicked", self._on_image_location_remove_button_clicked)
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_image_location_add_button_clicked(self, button):
+		"""GUI handler"""
+		dialog = Gtk.FileChooserDialog(
+			"Add new images location", self.gui["window"], Gtk.FileChooserAction.SELECT_FOLDER,
+			(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+		)
+
+		response = dialog.run()
+		if response == Gtk.ResponseType.OK:
+			path = dialog.get_current_folder()
+			self.image_location_store.append([len(self.image_location_store), path])
+			logger.debug("Adding new image location: %s", path)
+
+			locations = self._mainapp.settings.get_strv("images-location-list")
+			locations.append(path)
+			self._mainapp.settings.set_strv("images-location-list", locations)
+
+		else:
+			logger.debug("Adding new image location canceled")
+
+		dialog.destroy()
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_image_location_remove_button_clicked(self, button):
+		"""GUI handler"""
+		model, sel = self.gui["image-location-selection"].get_selected()
+		if sel is not None:
+			index = model[sel][self.image_location_data.index.INDEX]
+
+			locations = self._mainapp.settings.get_strv("images-location-list")
+			del locations[index]
+			self._mainapp.settings.set_strv("images-location-list", locations)
+
+			self._update_image_location_list()
 
 	@debuginfo(False, False)
 	def _update_image_location_list(self):

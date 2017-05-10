@@ -216,5 +216,7 @@ class MainWindow(GuiBase):
 			self._mainapp.settings.set_string("export-path", path)
 			self._parser.current.name = name
 			self._parser.export_image()
+		else:
+			logger.debug("Image export canceled")
 
 		dialog.destroy()
