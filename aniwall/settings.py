@@ -30,6 +30,11 @@ class SettingsWindow(GuiBase):
 
 		self._update_image_location_list()
 
+		# accelerators
+		self.accelerators = Gtk.AccelGroup()
+		self.gui["window"].add_accel_group(self.accelerators)
+		self.accelerators.connect(*Gtk.accelerator_parse("Escape"), Gtk.AccelFlags.VISIBLE, self.hide)
+
 		# signals
 		self.gui["window"].connect("delete-event", self.hide)
 		self.gui["image-location-add-button"].connect("clicked", self._on_image_location_add_button_clicked)
