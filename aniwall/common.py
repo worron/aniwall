@@ -35,17 +35,22 @@ class AttributeDict(dict):
 class TreeViewData:
 	"""Gtk treeview data handler"""
 	def __init__(self, data):
-		self.column = AttributeDict()
-		self.visible = []
-		self.types = []
-		self.titles = []
-		self.visible = []
-		self.maintain = []
+		self.data = data
+		self.index = AttributeDict([(item.get("literal"), i) for i, item in enumerate(data)])
 
-		for i, item in enumerate(data):
-			self.column[item["literal"]] = i
-			self.types.append(item["type"])
-			self.titles.append(item["title"])
-			self.visible.append(item["visible"])
-			if "maintain" in item and item["maintain"]:
-				self.maintain.append(i)
+	def build_store(self):
+		"""Build store for Gtk treeview"""
+		return Gtk.ListStore(*[item.get("type") for item in self.data])
+
+	def build_columns(self, treeview, **kwargs):
+		"""Build columns for Gtk treeview"""
+		for i, item in enumerate(self.data):
+			column = Gtk.TreeViewColumn(
+				item.get("title"),
+				item.get("render", Gtk.CellRendererText()),
+				**{item.get("attr", "text"): i}
+			)
+			column.set_visible(item.get("visible", True))
+			for k, v in kwargs.items():
+				column.set_property(k, v)
+			treeview.append_column(column)

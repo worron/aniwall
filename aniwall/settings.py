@@ -1,5 +1,4 @@
-from gi.repository import Gtk
-from aniwall.common import GuiBase
+from aniwall.common import GuiBase, TreeViewData
 from aniwall.logger import logger, debuginfo
 
 
@@ -14,11 +13,13 @@ class SettingsWindow(GuiBase):
 		)
 		super().__init__("settings.ui", elements=elements, path=self._mainapp.resource_path)
 
-		for i, title in enumerate(("#", "Location")):
-			column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
-			self.gui["image-location-treeview"].append_column(column)
+		self.image_location_data = TreeViewData((
+			dict(literal="INDEX", title="#", type=int, visible=False),
+			dict(literal="LOCATION", title="Location", type=str)
+		))
 
-		self.image_location_store = Gtk.ListStore(int, str)
+		self.image_location_data.build_columns(self.gui["image-location-treeview"])
+		self.image_location_store = self.image_location_data.build_store()
 		self.gui["image-location-treeview"].set_model(self.image_location_store)
 
 		self._update_image_location_list()

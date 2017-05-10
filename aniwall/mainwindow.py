@@ -23,14 +23,17 @@ class MainWindow(GuiBase):
 		self.image_view_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
 			dict(literal="FILE", title="File", type=str, visible=False),
-			dict(literal="NAME", title="Image", type=str, visible=True),
-			dict(literal="LOCATION", title="Location", type=str, visible=True)
+			dict(literal="NAME", title="Image", type=str),
+			dict(literal="LOCATION", title="Location", type=str)
 		))
 
 		self.color_view_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
-			dict(literal="NAME", title="Tag", type=str, visible=True, maintain=True),
-			dict(literal="COLOR", title="Color", type=GdkPixbuf.Pixbuf, visible=True, maintain=True),
+			dict(literal="NAME", title="Tag", type=str),
+			dict(
+				literal="COLOR", title="Color", type=GdkPixbuf.Pixbuf,
+				render=Gtk.CellRendererPixbuf().new(), attr="pixbuf"
+			),
 			dict(literal="HEX", title="Hex", type=str, visible=False)
 		))
 
@@ -62,33 +65,24 @@ class MainWindow(GuiBase):
 	def _build_store(self):
 		"""Build GUI stores"""
 		# image list store
-		for i, title in enumerate(self.image_view_data.titles):
-			column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
-			column.set_visible(self.image_view_data.visible[i])
-			column.set_min_width(self.MIN_COLUMN_WIDTH)
-			self.gui["image-list-treeview"].append_column(column)
+		self.image_view_data.build_columns(
+			self.gui["image-list-treeview"],
+			min_width=self.MIN_COLUMN_WIDTH
+		)
 
-		self.image_store = Gtk.ListStore(*self.image_view_data.types)
+		self.image_store = self.image_view_data.build_store()
 		self.image_store_filter = self.image_store.filter_new()
 		self.image_store_filter.set_visible_func(self._image_search_filter_func)
 		self.gui["image-list-treeview"].set_model(self.image_store_filter)
 
 		# image colors store
 		max_column_width = self.gui["color-list-scrolledwindow"].get_property("width_request") - self.MIN_COLUMN_WIDTH
-		for i, title in enumerate(self.color_view_data.titles):
-			if i == self.color_view_data.column.COLOR:
-				column = Gtk.TreeViewColumn(title, Gtk.CellRendererPixbuf().new(), pixbuf=i)
-			else:
-				column = Gtk.TreeViewColumn(title, Gtk.CellRendererText(), text=i)
+		self.color_view_data.build_columns(
+			self.gui["color-list-treeview"],
+			min_width=self.MIN_COLUMN_WIDTH, max_width=max_column_width, resizable=True
+		)
 
-			column.set_resizable(True)
-			column.set_max_width(max_column_width)
-			column.set_min_width(self.MIN_COLUMN_WIDTH)
-
-			column.set_visible(self.color_view_data.visible[i])
-			self.gui["color-list-treeview"].append_column(column)
-
-		self.color_store = Gtk.ListStore(*self.color_view_data.types)
+		self.color_store = self.color_view_data.build_store()
 		self.gui["color-list-treeview"].set_model(self.color_store)
 
 	@debuginfo(False, False)
@@ -127,7 +121,7 @@ class MainWindow(GuiBase):
 		if not self.image_search_text:
 			return True
 		else:
-			return self.image_search_text.lower() in model[treeiter][self.image_view_data.column.FILE].lower()
+			return self.image_search_text.lower() in model[treeiter][self.image_view_data.index.FILE].lower()
 
 	@debuginfo(False, False)
 	def _on_image_selection_changed(self, selection):
@@ -135,7 +129,7 @@ class MainWindow(GuiBase):
 		model, sel = selection.get_selected()
 		if sel is not None:
 			# update image preview
-			file_ = model[sel][self.image_view_data.column.FILE]
+			file_ = model[sel][self.image_view_data.index.FILE]
 			self._parser.set_image(file_)
 			self.update_preview()
 			self.update_color_list()
@@ -168,11 +162,11 @@ class MainWindow(GuiBase):
 		if response == Gtk.ResponseType.OK:
 			hex_color = hex_from_rgba(color_dialog.get_rgba())
 			treeiter = self.color_store.get_iter(path)
-			color_index = self.color_store[treeiter][self.color_view_data.column.INDEX]
+			color_index = self.color_store[treeiter][self.color_view_data.index.INDEX]
 			logger.debug("New color %s in line %s", hex_color, color_index)
 
-			self.color_store[treeiter][self.color_view_data.column.HEX] = hex_color
-			self.color_store[treeiter][self.color_view_data.column.COLOR] = pixbuf_from_hex(
+			self.color_store[treeiter][self.color_view_data.index.HEX] = hex_color
+			self.color_store[treeiter][self.color_view_data.index.COLOR] = pixbuf_from_hex(
 				hex_color, width=self.pixbuf_pattern_width
 			)
 			self._parser.current.change_color(hex_color, color_index)
