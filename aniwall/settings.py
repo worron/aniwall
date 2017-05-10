@@ -1,3 +1,5 @@
+import os
+
 from gi.repository import Gtk
 from aniwall.common import GuiBase, TreeViewData
 from aniwall.logger import logger, debuginfo
@@ -7,11 +9,13 @@ class SettingsWindow(GuiBase):
 	"""Main window constructor"""
 	def __init__(self, mainapp):
 		self._mainapp = mainapp
+		self._mainwindow = mainapp.mainwindow
 
 		# load GUI
 		elements = (
 			"window", "image-location-add-button", "image-location-add-button", "image-location-treeview",
 			"image-location-add-button", "image-location-remove-button", "image-location-selection",
+			"image-location-reload-button",
 		)
 		super().__init__("settings.ui", elements=elements, path=self._mainapp.resource_path)
 
@@ -30,6 +34,7 @@ class SettingsWindow(GuiBase):
 		self.gui["window"].connect("delete-event", self.hide)
 		self.gui["image-location-add-button"].connect("clicked", self._on_image_location_add_button_clicked)
 		self.gui["image-location-remove-button"].connect("clicked", self._on_image_location_remove_button_clicked)
+		self.gui["image-location-reload-button"].connect("clicked", self._on_image_location_reload_button_clicked)
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
@@ -39,6 +44,7 @@ class SettingsWindow(GuiBase):
 			"Add new images location", self.gui["window"], Gtk.FileChooserAction.SELECT_FOLDER,
 			(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
 		)
+		dialog.set_current_folder(os.path.expanduser("~"))
 
 		response = dialog.run()
 		if response == Gtk.ResponseType.OK:
@@ -68,6 +74,12 @@ class SettingsWindow(GuiBase):
 			self._mainapp.settings.set_strv("images-location-list", locations)
 
 			self._update_image_location_list()
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_image_location_reload_button_clicked(self, button):
+		"""GUI handler"""
+		self._mainwindow.update_image_list()
 
 	@debuginfo(False, False)
 	def _update_image_location_list(self):

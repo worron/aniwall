@@ -88,10 +88,12 @@ class MainWindow(GuiBase):
 	@debuginfo(False, False)
 	def update_image_list(self):
 		"""Set list of SVG images for GUI treeview"""
-		self.image_store.clear()
-		for i, image in enumerate(self._parser.image_list):
-			path, name = os.path.split(image)
-			self.image_store.append([i, image, os.path.splitext(name)[0], path])
+		self._parser.load_images(*self._mainapp.settings.get_strv("images-location-list"))
+		with self.gui["image-list-selection"].handler_block(self.handler["selection"]):
+			self.image_store.clear()
+			for i, image in enumerate(self._parser.image_list):
+				path, name = os.path.split(image)
+				self.image_store.append([i, image, os.path.splitext(name)[0], path])
 		self.gui["image-list-treeview"].set_cursor(0)
 
 	@debuginfo(False, False)

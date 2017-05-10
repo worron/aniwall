@@ -106,7 +106,6 @@ class MainApp(Gtk.Application):
 
 		# init application modules
 		self.parser = ImageParser(self, os.path.join(self.path.data, "test.svg"))
-		self.parser.load_images(*self.settings.get_strv("images-location-list"))
 		self.mainwindow = MainWindow(self)
 		self.setwindow = SettingsWindow(self)
 		self.mainwindow.update_image_list()
