@@ -95,15 +95,20 @@ class MainApp(Gtk.Application):
 		action.connect("activate", self.on_quit)
 		self.add_action(action)
 
+		action = Gio.SimpleAction.new("settings", None)
+		action.connect("activate", self.on_settings)
+		self.add_action(action)
+
 		# lazy import application modules
 		from aniwall.parser import ImageParser
 		from aniwall.mainwindow import MainWindow
+		from aniwall.settings import SettingsWindow
 
 		# init application modules
 		self.parser = ImageParser(self, os.path.join(self.path.data, "test.svg"))
 		self.parser.load_images(*self.settings.get_strv("images-location-list"))
 		self.mainwindow = MainWindow(self)
-
+		self.setwindow = SettingsWindow(self)
 		self.mainwindow.update_image_list()
 
 		# set application menu
@@ -135,12 +140,16 @@ class MainApp(Gtk.Application):
 		logger.info("Exit aniwall application")
 		Gtk.Application.do_shutdown(self)
 
-	# noinspection PyUnusedLocal,PyUnusedLocal
+	# noinspection PyUnusedLocal
 	def on_about(self, *args):
 		# about_dialog = Gtk.AboutDialog(transient_for=self.mainwindow.gui["window"], modal=True)
 		# about_dialog.show_all()
 		pass
 
-	# noinspection PyUnusedLocal,PyUnusedLocal
+	# noinspection PyUnusedLocal
 	def on_quit(self, *args):
 		self.quit()
+
+	# noinspection PyUnusedLocal
+	def on_settings(self, *args):
+		self.setwindow.show()

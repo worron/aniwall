@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkWindow" id="window">
+    <property name="default_width">480</property>
+    <property name="default_height">320</property>
+    <property name="title">Aniwall Settings</property>
+    <property name="type_hint">dialog</property>
+    <child>
+      <object class="GtkBox" id="main-box">
+        <property name="spacing">6</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox" id="image-location-box">
+            <child>
+              <object class="GtkLabel" id="image-location-label">
+                <property name="label">Image locations</property>
+              </object>
+              <packing>
+                <property name="pack_type">start</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="image-location-add-button">
+                <child>
+                  <object class="GtkImage" id="add-image">
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">list-add-symbolic</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="image-location-remove-button">
+                <child>
+                  <object class="GtkImage" id="remove-image">
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">list-remove-symbolic</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="image-list-scrolledwindow">
+            <child>
+              <object class="GtkTreeView" id="image-location-treeview">
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="image-location-selection"/>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
