@@ -16,9 +16,11 @@ class SettingsWindow(GuiBase):
 			"window", "image-location-add-button", "image-location-add-button", "image-location-treeview",
 			"image-location-add-button", "image-location-remove-button", "image-location-selection",
 			"image-location-reload-button", "export-type-menu-button", "export-type-menu",
+			"export-width-spinbutton", "export-height-spinbutton",
 		)
 		super().__init__("settings.ui", "export-type-menu.ui", elements=elements, path=self._mainapp.resource_path)
 
+		# image location list view
 		self.image_location_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
 			dict(literal="LOCATION", title="Location", type=str)
@@ -28,13 +30,20 @@ class SettingsWindow(GuiBase):
 		self.image_location_store = self.image_location_data.build_store()
 		self.gui["image-location-treeview"].set_model(self.image_location_store)
 
-		# self.EXPORT_TYPE = ("png", "jpeg", "tiff", "ico", "bmp")
-		# for type_ in self.EXPORT_TYPE:
-		# 	self.gui["export-type-combo"].append_text(type_)
-		# self.gui["export-type-combo"].set_active(0)
-		self.gui["export-type-menu-button"].set_menu_model(self.gui["export-type-menu"])
+		# gui setup
+		self.gui["export-width-spinbutton"].set_value(int(self._mainapp.settings.get_string("export-width")))
+		self.gui["export-height-spinbutton"].set_value(int(self._mainapp.settings.get_string("export-height")))
 
+		self.gui["export-type-menu-button"].set_menu_model(self.gui["export-type-menu"])
 		self._update_image_location_list()
+
+		# bind settings
+		self._mainapp.settings.bind(
+			"export-width", self.gui["export-width-spinbutton"], "text", Gio.SettingsBindFlags.DEFAULT
+		)
+		self._mainapp.settings.bind(
+			"export-height", self.gui["export-height-spinbutton"], "text", Gio.SettingsBindFlags.DEFAULT
+		)
 
 		# actions
 		self.actions = Gio.SimpleActionGroup()

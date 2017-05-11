@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <object class="GtkAdjustment" id="shift-x-spinbutton-adjustment">
-    <property name="upper">10000</property>
-    <property name="lower">-10000</property>
+    <property name="upper">9999</property>
+    <property name="lower">-9999</property>
     <property name="step_increment">5</property>
   </object>
   <object class="GtkAdjustment" id="shift-y-spinbutton-adjustment">
-    <property name="upper">10000</property>
-    <property name="lower">-10000</property>
+    <property name="upper">9999</property>
+    <property name="lower">-9999</property>
     <property name="step_increment">5</property>
   </object>
   <object class="GtkAdjustment" id="scale-spinbutton-adjustment">

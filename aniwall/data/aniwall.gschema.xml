@@ -17,5 +17,11 @@
       </choices>
       <default>'png'</default>
     </key>
+    <key name="export-width" type="s">
+      <default>'1920'</default>
+    </key>
+    <key name="export-height" type="s">
+      <default>'1080'</default>
+    </key>
   </schema>
 </schemalist>

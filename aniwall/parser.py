@@ -179,7 +179,9 @@ class ImageParser:
 		"""GUI handler"""
 		type_ = self._mainapp.settings.get_string("export-type")
 		file_ = os.path.join(self._mainapp.settings.get_string("export-path"), self.current.name + "." + type_)
-		logger.debug("Exporting image: %s" % file_)
+		width = self._mainapp.settings.get_string("export-width")
+		height = self._mainapp.settings.get_string("export-height")
+		logger.debug("Exporting image: %s at size %sx%s", file_, width, height)
 
-		pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.temporary.name)
+		pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.temporary.name, int(width), int(height), False)
 		pixbuf.savev(file_, type_, [], [])

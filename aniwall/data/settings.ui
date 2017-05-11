@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+  <object class="GtkAdjustment" id="export-width-spinbutton-adjustment">
+    <property name="upper">9999</property>
+    <property name="lower">1</property>
+    <property name="step_increment">5</property>
+  </object>
+  <object class="GtkAdjustment" id="export-height-spinbutton-adjustment">
+    <property name="upper">9999</property>
+    <property name="lower">1</property>
+    <property name="step_increment">5</property>
+  </object>
   <object class="GtkWindow" id="window">
     <property name="default_width">480</property>
     <property name="default_height">320</property>
@@ -14,6 +24,11 @@
             <property name="spacing">6</property>
             <property name="orientation">horizontal</property>
             <child>
+              <object class="GtkLabel" id="export-settings-label">
+                <property name="label">Export settings</property>
+              </object>
+            </child>
+            <child>
               <object class="GtkMenuButton" id="export-type-menu-button">
                 <child>
                   <object class="GtkImage" id="system-icon">
@@ -21,6 +36,25 @@
                   </object>
                 </child>
               </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="export-height-spinbutton">
+                <property name="adjustment">export-height-spinbutton-adjustment</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="export-width-spinbutton">
+                <property name="adjustment">export-width-spinbutton-adjustment</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
             </child>
           </object>
           <packing>
