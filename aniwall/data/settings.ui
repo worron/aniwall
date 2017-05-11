@@ -12,16 +12,20 @@
   </object>
   <object class="GtkWindow" id="window">
     <property name="default_width">480</property>
-    <property name="default_height">320</property>
-    <property name="title">Aniwall Settings</property>
+    <property name="default_height">280</property>
+    <property name="title">Aniwall Preferences</property>
     <property name="type_hint">dialog</property>
     <child>
       <object class="GtkBox" id="main-box">
         <property name="spacing">6</property>
         <property name="orientation">vertical</property>
+        <property name="margin_top">12</property>
+        <property name="margin_right">12</property>
+        <property name="margin_left">12</property>
+        <property name="margin_bottom">12</property>
         <child>
           <object class="GtkBox" id="image-export-box">
-            <property name="spacing">6</property>
+            <property name="spacing">12</property>
             <property name="orientation">horizontal</property>
             <child>
               <object class="GtkLabel" id="export-settings-label">
@@ -63,12 +67,19 @@
           </packing>
         </child>
         <child>
+          <object class="GtkSeparator" id="separator-1">
+            <property name="margin_bottom">3</property>
+            <property name="margin_top">3</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkBox" id="image-location-box">
-            <property name="spacing">6</property>
+            <property name="spacing">12</property>
             <property name="orientation">horizontal</property>
+            <property name="margin_bottom">6</property>
             <child>
               <object class="GtkLabel" id="image-location-label">
-                <property name="label">Image locations</property>
+                <property name="label">Image location settings</property>
               </object>
               <packing>
                 <property name="pack_type">start</property>
