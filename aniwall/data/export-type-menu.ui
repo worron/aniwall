@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="export-type-menu">
+    <section>
+      <item>
+        <attribute name="action">settings.export_type</attribute>
+        <attribute name="target">png</attribute>
+        <attribute name="label">png</attribute>
+      </item>
+      <item>
+        <attribute name="action">settings.export_type</attribute>
+        <attribute name="target">jpeg</attribute>
+        <attribute name="label">jpeg</attribute>
+      </item>
+      <item>
+        <attribute name="action">settings.export_type</attribute>
+        <attribute name="target">tiff</attribute>
+        <attribute name="label">tiff</attribute>
+      </item>
+      <item>
+        <attribute name="action">settings.export_type</attribute>
+        <attribute name="target">ico</attribute>
+        <attribute name="label">ico</attribute>
+      </item>
+      <item>
+        <attribute name="action">settings.export_type</attribute>
+        <attribute name="target">bmp</attribute>
+        <attribute name="label">bmp</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

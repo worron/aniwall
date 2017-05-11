@@ -10,6 +10,25 @@
         <property name="spacing">6</property>
         <property name="orientation">vertical</property>
         <child>
+          <object class="GtkBox" id="image-export-box">
+            <property name="spacing">6</property>
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkMenuButton" id="export-type-menu-button">
+                <child>
+                  <object class="GtkImage" id="system-icon">
+                    <property name="icon-name">emblem-system-symbolic</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkBox" id="image-location-box">
             <property name="spacing">6</property>
             <property name="orientation">horizontal</property>

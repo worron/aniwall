@@ -1,12 +1,12 @@
 import os
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio, GLib
 from aniwall.common import GuiBase, TreeViewData
 from aniwall.logger import logger, debuginfo
 
 
 class SettingsWindow(GuiBase):
-	"""Main window constructor"""
+	"""Settings window constructor"""
 	def __init__(self, mainapp):
 		self._mainapp = mainapp
 		self._mainwindow = mainapp.mainwindow
@@ -15,9 +15,9 @@ class SettingsWindow(GuiBase):
 		elements = (
 			"window", "image-location-add-button", "image-location-add-button", "image-location-treeview",
 			"image-location-add-button", "image-location-remove-button", "image-location-selection",
-			"image-location-reload-button",
+			"image-location-reload-button", "export-type-menu-button", "export-type-menu",
 		)
-		super().__init__("settings.ui", elements=elements, path=self._mainapp.resource_path)
+		super().__init__("settings.ui", "export-type-menu.ui", elements=elements, path=self._mainapp.resource_path)
 
 		self.image_location_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
@@ -28,7 +28,21 @@ class SettingsWindow(GuiBase):
 		self.image_location_store = self.image_location_data.build_store()
 		self.gui["image-location-treeview"].set_model(self.image_location_store)
 
+		# self.EXPORT_TYPE = ("png", "jpeg", "tiff", "ico", "bmp")
+		# for type_ in self.EXPORT_TYPE:
+		# 	self.gui["export-type-combo"].append_text(type_)
+		# self.gui["export-type-combo"].set_active(0)
+		self.gui["export-type-menu-button"].set_menu_model(self.gui["export-type-menu"])
+
 		self._update_image_location_list()
+
+		# actions
+		self.actions = Gio.SimpleActionGroup()
+		type_variant = GLib.Variant.new_string(self._mainapp.settings.get_string("export-type"))
+		action = Gio.SimpleAction.new_stateful("export_type", type_variant.get_type(), type_variant)
+		action.connect("change-state", self._on_change_export_type)
+		self.actions.add_action(action)
+		self.gui["window"].insert_action_group("settings", self.actions)
 
 		# accelerators
 		self.accelerators = Gtk.AccelGroup()
@@ -85,6 +99,13 @@ class SettingsWindow(GuiBase):
 	def _on_image_location_reload_button_clicked(self, button):
 		"""GUI handler"""
 		self._mainwindow.update_image_list()
+
+	def _on_change_export_type(self, action, value):
+		"""Action handler"""
+		action.set_state(value)
+		type_ = value.get_string()
+		self._mainapp.settings.set_string("export-type", type_)
+		logger.debug("Export type changed: %s", type_)
 
 	@debuginfo(False, False)
 	def _update_image_location_list(self):
