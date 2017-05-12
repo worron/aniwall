@@ -29,6 +29,9 @@
     <child>
       <object class="GtkBox" id="main-box">
         <property name="orientation">vertical</property>
+        <property name="margin_right">12</property>
+        <property name="margin_left">12</property>
+        <property name="margin_bottom">12</property>
         <child>
           <object class="GtkImage" id="preview">
             <property name="stock">gtk-missing-image</property>
@@ -47,6 +50,7 @@
           <object class="GtkBox" id="panel-box">
             <property name="spacing">6</property>
             <property name="orientation">horizontal</property>
+            <property name="spacing">6</property>
             <child>
               <object class="GtkSearchEntry" id="image-search-entry">
                 <property name="margin_right">12</property>
@@ -76,6 +80,7 @@
             </child>
             <child>
               <object class="GtkButton" id="export-as-button">
+                <property name="margin_right">6</property>
                 <child>
                   <object class="GtkImage" id="save-as-image">
                     <property name="can_focus">False</property>
@@ -95,6 +100,7 @@
             <child>
               <object class="GtkSpinButton" id="shift-y-spinbutton">
                 <property name="adjustment">shift-y-spinbutton-adjustment</property>
+                <property name="margin_right">6</property>
               </object>
               <packing>
                 <property name="pack_type">end</property>
@@ -110,6 +116,7 @@
             </child>
             <child>
               <object class="GtkLabel" id="shift-label">
+                <property name="margin_right">6</property>
                 <property name="label">Shift</property>
               </object>
               <packing>
@@ -128,6 +135,7 @@
             </child>
             <child>
               <object class="GtkLabel" id="scale-label">
+                <property name="margin_right">6</property>
                 <property name="label">Scale</property>
               </object>
               <packing>
