@@ -1,6 +1,7 @@
 import os
 
 from gi.repository import Gtk, GdkPixbuf
+from aniwall.dialog import ExportDialog
 from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, pixbuf_from_hex
 
@@ -43,6 +44,9 @@ class MainWindow(GuiBase):
 
 		self.image_search_text = None
 		self._build_store()
+
+		# dialogs setup
+		self.export_dialog = ExportDialog(self.gui["window"], "Export image as")
 
 		# set application main window
 		self.gui["window"].set_application(mainapp)
@@ -203,22 +207,11 @@ class MainWindow(GuiBase):
 	@debuginfo(False, False)
 	def _on_export_as_button_clicked(self, button):
 		"""GUI handler"""
-		dialog = Gtk.FileChooserDialog(
-			"Export image as", self.gui["window"], Gtk.FileChooserAction.SAVE,
-			(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+		is_ok, path, name = self.export_dialog.run(
+			self._mainapp.settings.get_string("export-path"),
+			self._parser.current.name
 		)
-		dialog.set_current_folder(self._mainapp.settings.get_string("export-path"))
-		dialog.set_current_name(self._parser.current.name)
-
-		response = dialog.run()
-		if response == Gtk.ResponseType.OK:
-			path, name = os.path.split(dialog.get_filename())
-			name = os.path.splitext(name)[0]
-			logger.debug("New export settings: [path: %s], [name: %s]" % (path, name))
+		if is_ok:
 			self._mainapp.settings.set_string("export-path", path)
 			self._parser.current.name = name
 			self._parser.export_image()
-		else:
-			logger.debug("Image export canceled")
-
-		dialog.destroy()
