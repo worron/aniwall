@@ -19,7 +19,7 @@ class GuiBase:
 		self.resource_path = path
 		self.builder = Gtk.Builder()
 		for file_ in files:
-			self.builder.add_from_resource(self.resource_path + file_)
+			self.builder.add_from_resource(self.resource_path + "ui/" + file_)
 		self.gui = {element: self.builder.get_object(element) for element in elements}
 
 

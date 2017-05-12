@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/worron/aniwall">
-    <file preprocess="xml-stripblanks">mainwindow.ui</file>
-    <file preprocess="xml-stripblanks">menu.ui</file>
-    <file preprocess="xml-stripblanks">settings.ui</file>
-    <file preprocess="xml-stripblanks">export-type-menu.ui</file>
+    <file preprocess="xml-stripblanks">ui/mainwindow.ui</file>
+    <file preprocess="xml-stripblanks">ui/menu.ui</file>
+    <file preprocess="xml-stripblanks">ui/settings.ui</file>
+    <file preprocess="xml-stripblanks">ui/export-type-menu.ui</file>
   </gresource>
 </gresources>

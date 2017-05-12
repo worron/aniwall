@@ -104,13 +104,13 @@ class MainApp(Gtk.Application):
 		from aniwall.settings import SettingsWindow
 
 		# init application modules
-		self.parser = ImageParser(self, os.path.join(self.path["data"], "test.svg"))
+		self.parser = ImageParser(self, os.path.join(self.path["data"], "images", "test.svg"))
 		self.mainwindow = MainWindow(self)
 		self.setwindow = SettingsWindow(self)
 		self.mainwindow.update_image_list()
 
 		# set application menu
-		builder = Gtk.Builder.new_from_resource("/com/github/worron/aniwall/menu.ui")
+		builder = Gtk.Builder.new_from_resource(self.resource_path + "ui/menu.ui")
 		self.set_app_menu(builder.get_object("app-menu"))
 
 		logger.info("Application modules initialization complete")
