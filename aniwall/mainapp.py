@@ -3,7 +3,6 @@ import shutil
 
 from gi.repository import GLib, Gio, Gtk
 from aniwall.logger import logger
-from aniwall.common import AttributeDict
 
 
 class MainApp(Gtk.Application):
@@ -28,7 +27,7 @@ class MainApp(Gtk.Application):
 		"""
 		logger.info("Loading resources...")
 		# Set data files locations
-		self.path = AttributeDict(
+		self.path = dict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
 			user=os.path.expanduser("~/.config/aniwall")
 		)
@@ -36,7 +35,7 @@ class MainApp(Gtk.Application):
 			logger.debug("Data files location:\n%s", "\n".join(k + ": " + v for k, v in self.path.items()))
 
 		# init resources
-		resource_path = os.path.join(self.path.data, "aniwall.gresource")
+		resource_path = os.path.join(self.path["data"], "aniwall.gresource")
 		resource = Gio.Resource.load(resource_path)
 		# noinspection PyProtectedMember
 		resource._register()
@@ -46,17 +45,17 @@ class MainApp(Gtk.Application):
 			logger.debug("List of loaded resources files:\n%s" % resource_files)
 
 		# init settings
-		if not os.path.exists(self.path.user):
-			logger.info("Creating user config location:\n%s" % self.path.user)
-			os.makedirs(self.path.user)
+		if not os.path.exists(self.path["user"]):
+			logger.info("Creating user config location:\n%s" % self.path["user"])
+			os.makedirs(self.path["user"])
 
-		user_schema = os.path.join(self.path.user, "gschemas.compiled")
+		user_schema = os.path.join(self.path["user"], "gschemas.compiled")
 		if not os.path.isfile(user_schema):
-			shutil.copyfile(os.path.join(self.path.data, "gschemas.compiled"), user_schema)
-			logger.info("Set user config location:\n%s" % self.path.user)
+			shutil.copyfile(os.path.join(self.path["data"], "gschemas.compiled"), user_schema)
+			logger.info("Set user config location:\n%s" % self.path["user"])
 
 		schema_source = Gio.SettingsSchemaSource.new_from_directory(
-			self.path.data,
+			self.path["data"],
 			Gio.SettingsSchemaSource.get_default(),
 			False,
 		)
@@ -105,7 +104,7 @@ class MainApp(Gtk.Application):
 		from aniwall.settings import SettingsWindow
 
 		# init application modules
-		self.parser = ImageParser(self, os.path.join(self.path.data, "test.svg"))
+		self.parser = ImageParser(self, os.path.join(self.path["data"], "test.svg"))
 		self.mainwindow = MainWindow(self)
 		self.setwindow = SettingsWindow(self)
 		self.mainwindow.update_image_list()
