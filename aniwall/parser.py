@@ -202,6 +202,16 @@ class ImageParser:
 		self.current.rebuild(self.temporary.name)
 
 	@debuginfo(False, False)
+	def save_changes(self):
+		"""Save image changes"""
+		self.current.rebuild()
+
+	@debuginfo(False, False)
+	def reset_changes(self):
+		"""Reset image changes"""
+		self.set_image(self.current.file)
+
+	@debuginfo(False, False)
 	def export_image(self):
 		"""GUI handler"""
 		type_ = self._mainapp.settings.get_string("export-type")

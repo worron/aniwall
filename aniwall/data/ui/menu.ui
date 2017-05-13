@@ -3,6 +3,21 @@
   <menu id="app-menu">
     <section>
       <submenu>
+        <attribute name="label" >Image</attribute>
+        <section>
+          <item>
+            <attribute name="action">palette.reset</attribute>
+            <attribute name="label">_Reset Changes</attribute>
+            <attribute name="accel">&lt;Primary&gt;r</attribute>
+          </item>
+          <item>
+            <attribute name="action">palette.save</attribute>
+            <attribute name="label">_Save Changes</attribute>
+            <attribute name="accel">&lt;Primary&gt;s</attribute>
+          </item>
+        </section>
+      </submenu>
+      <submenu>
         <attribute name="label" >Palette</attribute>
         <section>
           <item>
@@ -12,11 +27,6 @@
           <item>
             <attribute name="action">palette.export</attribute>
             <attribute name="label">Export</attribute>
-          </item>
-          <item>
-            <attribute name="action">palette.reset</attribute>
-            <attribute name="label">_Reset Image</attribute>
-            <attribute name="accel">&lt;Primary&gt;r</attribute>
           </item>
         </section>
       </submenu>
