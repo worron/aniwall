@@ -61,7 +61,7 @@ class MainWindow(GuiBase):
 		self.actions = {}
 		self.actions["palette"] = Gio.SimpleActionGroup()
 
-		for name in ("import", "export"):
+		for name in ("import", "export", "reset"):
 			action = Gio.SimpleAction.new(name, None)
 			action.connect("activate", getattr(self, "_on_palette_%s" % name))
 			self.actions["palette"].add_action(action)
@@ -264,3 +264,11 @@ class MainWindow(GuiBase):
 			self._parser.current.export_colors(filename)
 		else:
 			logger.debug("Palette export canceled")
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_palette_reset(self, *args):
+		"""Action handler"""
+		self._parser.set_image(self._parser.current.file)
+		self.update_preview()
+		self.update_color_list()

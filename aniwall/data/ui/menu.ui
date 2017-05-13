@@ -13,6 +13,11 @@
             <attribute name="action">palette.export</attribute>
             <attribute name="label">Export</attribute>
           </item>
+          <item>
+            <attribute name="action">palette.reset</attribute>
+            <attribute name="label">_Reset Image</attribute>
+            <attribute name="accel">&lt;Primary&gt;r</attribute>
+          </item>
         </section>
       </submenu>
       <item>
