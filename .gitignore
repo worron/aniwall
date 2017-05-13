@@ -5,7 +5,7 @@
 .idea/**
 
 # Temporary ignore (test) images
-aniwall/images/**
+images/**
 
 # Ignore GTK+ binary
 aniwall/data/aniwall.gresource  

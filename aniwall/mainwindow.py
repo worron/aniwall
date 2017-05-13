@@ -22,6 +22,13 @@ class MainWindow(GuiBase):
 		)
 		super().__init__("mainwindow.ui", elements=elements, path=self._mainapp.resource_path)
 
+		self.IMAGE_OFFSET = 12
+		self.MIN_COLUMN_WIDTH = 120
+		self.pixbuf_pattern_width = self.MIN_COLUMN_WIDTH - 24
+
+		self.image_search_text = None
+
+		# build list view
 		self.image_view_data = TreeViewData((
 			dict(literal="INDEX", title="#", type=int, visible=False),
 			dict(literal="FILE", title="File", type=str, visible=False),
@@ -39,11 +46,6 @@ class MainWindow(GuiBase):
 			dict(literal="HEX", title="Hex", type=str, visible=False)
 		))
 
-		self.IMAGE_OFFSET = 12
-		self.MIN_COLUMN_WIDTH = 120
-		self.pixbuf_pattern_width = self.MIN_COLUMN_WIDTH - 24
-
-		self.image_search_text = None
 		self._build_store()
 
 		# dialogs setup

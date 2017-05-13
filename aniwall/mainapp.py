@@ -42,7 +42,8 @@ class MainApp(Gtk.Application):
 		resource._register()
 
 		if logger.is_debug():
-			resource_files = "\n".join(resource.enumerate_children(self.resource_path, Gio.ResourceLookupFlags.NONE))
+			ui_resource_path = self.resource_path + "ui/"
+			resource_files = "\n".join(resource.enumerate_children(ui_resource_path, Gio.ResourceLookupFlags.NONE))
 			logger.debug("List of loaded resources files:\n%s" % resource_files)
 
 		# init settings
@@ -70,7 +71,7 @@ class MainApp(Gtk.Application):
 		if not self.settings.get_strv("images-location-list"):
 			self.settings.set_strv(
 				"images-location-list",
-				[os.path.join(os.path.abspath(os.path.dirname(__file__)), "images")]
+				[os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "images")]
 			)
 
 		if logger.is_debug():
