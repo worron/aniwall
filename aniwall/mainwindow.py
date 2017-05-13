@@ -147,6 +147,11 @@ class MainWindow(GuiBase):
 		else:
 			return self.image_search_text.lower() in model[treeiter][self.image_view_data.index.FILE].lower()
 
+	def _set_subtitle(self, modded=False):
+		"""Set current image name and state to header bar"""
+		sub_title = "%s [modified]" % self._parser.current.name if modded else self._parser.current.name
+		self.gui["headerbar"].set_subtitle(sub_title)
+
 	@debuginfo(False, False)
 	def _on_image_selection_changed(self, selection):
 		"""GUI handler"""
@@ -157,6 +162,8 @@ class MainWindow(GuiBase):
 			self._parser.set_image(file_)
 			self.update_preview()
 			self.update_color_list()
+			# update title
+			self._set_subtitle()
 			# update image data
 			self.gui["scale-spinbutton"].set_value(float(self._parser.current.scale))
 			self.gui["shift-x-spinbutton"].set_value(float(self._parser.current.shift[0]))
@@ -196,6 +203,7 @@ class MainWindow(GuiBase):
 			self._parser.current.change_color(hex_color, color_index)
 			self._parser.apply_changes()
 			self.update_preview()
+			self._set_subtitle(True)
 
 		color_dialog.destroy()
 
@@ -249,6 +257,7 @@ class MainWindow(GuiBase):
 			self._parser.apply_changes()
 			self.update_color_list()
 			self.update_preview()
+			self._set_subtitle(True)
 		else:
 			logger.debug("Palette import canceled")
 
@@ -272,9 +281,11 @@ class MainWindow(GuiBase):
 		self._parser.reset_changes()
 		self.update_preview()
 		self.update_color_list()
+		self._set_subtitle()
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
 	def _on_palette_save(self, *args):
 		"""Action handler"""
 		self._parser.save_changes()
+		self._set_subtitle()
