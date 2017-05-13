@@ -2,6 +2,19 @@
 <interface>
   <menu id="app-menu">
     <section>
+      <submenu>
+        <attribute name="label" >Palette</attribute>
+        <section>
+          <item>
+            <attribute name="action">palette.import</attribute>
+            <attribute name="label">Import</attribute>
+          </item>
+          <item>
+            <attribute name="action">palette.export</attribute>
+            <attribute name="label">Export</attribute>
+          </item>
+        </section>
+      </submenu>
       <item>
         <attribute name="action">app.settings</attribute>
         <attribute name="label" translatable="yes">_Preferences</attribute>

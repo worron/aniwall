@@ -3,6 +3,7 @@ import re
 import tempfile
 import shutil
 
+from configparser import ConfigParser
 from itertools import count
 from lxml import etree
 from gi.repository import GdkPixbuf
@@ -90,6 +91,32 @@ class ImageData:
 				attr = "transform" if name == "transform" else "fill"
 				tag_info += "[%s: %s], " % (name, tag.get(attr))
 			logger.debug(tag_info)
+
+	def export_colors(self, file_):
+		"""Export colors to ini file"""
+		bg = dict(background=self.bg)
+		colors = {"color" + str(i): c for i, c in enumerate(self.colors)}
+		palette = {**bg, **colors}
+		logger.debug("Exporting colors: %s", str(palette))
+
+		config = ConfigParser()
+		config["colors"] = palette
+		with open(file_, "w") as configfile:
+			config.write(configfile)
+
+	def import_colors(self, file_):
+		"""Import colors from ini file"""
+		try:
+			config = ConfigParser()
+			config.read(file_)
+			self.bg = config["colors"]["background"]
+			for i, color in enumerate(self.colors):
+				tag = "color" + str(i)
+				if tag in config["colors"]:
+					self.colors[i] = config["colors"][tag]
+			logger.debug("Updated color scheme: %s, %s", self.bg, str(self.colors))
+		except Exception:
+			logger.exception("Fail to load palette from file: %s", file_)
 
 
 class ImageParser:

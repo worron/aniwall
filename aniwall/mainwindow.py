@@ -11,6 +11,7 @@ class MainWindow(GuiBase):
 	def __init__(self, mainapp):
 		self._mainapp = mainapp
 		self._parser = mainapp.parser
+		self.palette_extension = ".plt"
 
 		# load GUI
 		elements = (
@@ -244,6 +245,10 @@ class MainWindow(GuiBase):
 		is_ok, _, filename = self.palette_import_dialog.run()
 		if is_ok:
 			logger.debug("New palette import request: %s", filename)
+			self._parser.current.import_colors(filename)
+			self._parser.apply_changes()
+			self.update_color_list()
+			self.update_preview()
 		else:
 			logger.debug("Palette import canceled")
 
@@ -253,6 +258,9 @@ class MainWindow(GuiBase):
 		"""Action handler"""
 		is_ok, _, filename = self.palette_export_dialog.run(name_suggest="scheme")
 		if is_ok:
+			if not filename.endswith(self.palette_extension):
+				filename = filename + self.palette_extension
 			logger.debug("New palette export settings: %s" % filename)
+			self._parser.current.export_colors(filename)
 		else:
 			logger.debug("Palette export canceled")
