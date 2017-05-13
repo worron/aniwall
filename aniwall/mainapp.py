@@ -26,6 +26,7 @@ class MainApp(Gtk.Application):
 		Use this one to make all setup AFTER command line parsing completed.
 		"""
 		logger.info("Loading resources...")
+
 		# Set data files locations
 		self.path = dict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),

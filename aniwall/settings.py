@@ -1,6 +1,6 @@
 from gi.repository import Gtk, Gio, GLib
 from aniwall.common import GuiBase, TreeViewData
-from aniwall.dialog import ImageLocationDialog
+from aniwall.dialog import FileDialog
 from aniwall.logger import logger, debuginfo
 
 
@@ -19,7 +19,7 @@ class SettingsWindow(GuiBase):
 		)
 		super().__init__("settings.ui", "export-type-menu.ui", elements=elements, path=self._mainapp.resource_path)
 
-		self.location_dialog = ImageLocationDialog(
+		self.location_dialog = FileDialog(
 			self.gui["window"], "Add new images location",
 			Gtk.FileChooserAction.SELECT_FOLDER, Gtk.STOCK_OPEN
 		)
@@ -72,13 +72,17 @@ class SettingsWindow(GuiBase):
 	@debuginfo(False, False)
 	def _on_image_location_add_button_clicked(self, button):
 		"""GUI handler"""
-		is_ok, path = self.location_dialog.run()
+		is_ok, path, _ = self.location_dialog.run()
 		if is_ok:
 			self.image_location_store.append([len(self.image_location_store), path])
 
 			locations = self._mainapp.settings.get_strv("images-location-list")
 			locations.append(path)
 			self._mainapp.settings.set_strv("images-location-list", locations)
+
+			logger.debug("Adding new image location: %s", path)
+		else:
+			logger.debug("Adding new image location canceled")
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)

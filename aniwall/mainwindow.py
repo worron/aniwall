@@ -1,7 +1,7 @@
 import os
 
-from gi.repository import Gtk, GdkPixbuf
-from aniwall.dialog import ExportDialog
+from gi.repository import Gtk, GdkPixbuf, Gio
+from aniwall.dialog import FileDialog
 from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, pixbuf_from_hex
 
@@ -46,10 +46,27 @@ class MainWindow(GuiBase):
 		self._build_store()
 
 		# dialogs setup
-		self.export_dialog = ExportDialog(self.gui["window"], "Export image as")
+		self.export_dialog = FileDialog(self.gui["window"], "Export image as")
+		self.palette_export_dialog = FileDialog(self.gui["window"], "Export color palette as")
+		self.palette_import_dialog = FileDialog(
+			self.gui["window"], "Import color palette",
+			Gtk.FileChooserAction.OPEN, Gtk.STOCK_OPEN,
+		)
 
 		# set application main window
 		self.gui["window"].set_application(mainapp)
+
+		# actions
+		self.actions = {}
+		self.actions["palette"] = Gio.SimpleActionGroup()
+
+		for name in ("import", "export"):
+			action = Gio.SimpleAction.new(name, None)
+			action.connect("activate", getattr(self, "_on_palette_%s" % name))
+			self.actions["palette"].add_action(action)
+
+		for prefix, group in self.actions.items():
+			self.gui["window"].insert_action_group(prefix, group)
 
 		# signals
 		self.handler = {}
@@ -207,11 +224,35 @@ class MainWindow(GuiBase):
 	@debuginfo(False, False)
 	def _on_export_as_button_clicked(self, button):
 		"""GUI handler"""
-		is_ok, path, name = self.export_dialog.run(
+		is_ok, path, filename = self.export_dialog.run(
 			self._mainapp.settings.get_string("export-path"),
 			self._parser.current.name
 		)
 		if is_ok:
+			name = os.path.splitext(os.path.basename(filename))[0]
 			self._mainapp.settings.set_string("export-path", path)
 			self._parser.current.name = name
 			self._parser.export_image()
+			logger.debug("New image export settings: [path: %s], [name: %s]" % (path, name))
+		else:
+			logger.debug("Image export canceled")
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_palette_import(self, *args):
+		"""Action handler"""
+		is_ok, _, filename = self.palette_import_dialog.run()
+		if is_ok:
+			logger.debug("New palette import request: %s", filename)
+		else:
+			logger.debug("Palette import canceled")
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_palette_export(self, *args):
+		"""Action handler"""
+		is_ok, _, filename = self.palette_export_dialog.run(name_suggest="scheme")
+		if is_ok:
+			logger.debug("New palette export settings: %s" % filename)
+		else:
+			logger.debug("Palette export canceled")

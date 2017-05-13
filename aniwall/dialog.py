@@ -1,63 +1,44 @@
 import os
 
 from gi.repository import Gtk
-from aniwall.logger import logger
 
 
-class DialogBase:
+class FileDialog:
 	"""Dialog constructor base"""
 	def __init__(self, parent, title, action=Gtk.FileChooserAction.SAVE, action_button=Gtk.STOCK_SAVE):
 		self.parent = parent
 		self.title = title
 		self.action = action
 		self.action_button = action_button
+		self.homedir = os.path.expanduser("~")
 
-	def _build_dialog(self):
-		return Gtk.FileChooserDialog(
+	def run(self, path_suggest=None, name_suggest=None):
+		"""Activate dialog"""
+		dialog = Gtk.FileChooserDialog(
 			self.title, self.parent, self.action,
 			(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, self.action_button, Gtk.ResponseType.OK)
 		)
 
-
-class ExportDialog(DialogBase):
-	"""Image export dialog constructor"""
-	def run(self, path_suggest, name_suggest):
-		"""Activate dialog"""
-		dialog = self._build_dialog()
-		dialog.set_current_folder(path_suggest)
-		dialog.set_current_name(name_suggest)
-
-		is_ok, path, name = False, None, None
-		response = dialog.run()
-
-		if response == Gtk.ResponseType.OK:
-			is_ok = True
-			path, name = os.path.split(dialog.get_filename())
-			name = os.path.splitext(name)[0]
-			logger.debug("New export settings: [path: %s], [name: %s]" % (path, name))
+		# set initial location and file name
+		if path_suggest is not None:
+			dialog.set_current_folder(path_suggest)
 		else:
-			logger.debug("Image export canceled")
+			dialog.set_current_folder(self.homedir)
+		if name_suggest is not None:
+			dialog.set_current_name(name_suggest)
 
-		dialog.destroy()
-		return is_ok, path, name
-
-
-class ImageLocationDialog(DialogBase):
-	"""Image export dialog constructor"""
-	def run(self):
-		"""Activate dialog"""
-		dialog = self._build_dialog()
-		dialog.set_current_folder(os.path.expanduser("~"))
-
-		is_ok, path = False, None
+		# listen response
+		is_ok, path, filename = False, None, None
 		response = dialog.run()
 
 		if response == Gtk.ResponseType.OK:
+			# get data
 			is_ok = True
 			path = dialog.get_current_folder()
-			logger.debug("Adding new image location: %s", path)
-		else:
-			logger.debug("Adding new image location canceled")
+			if self.action != Gtk.FileChooserAction.SELECT_FOLDER:
+				filename = dialog.get_filename()
 
+		# clean up
 		dialog.destroy()
-		return is_ok, path
+		return is_ok, path, filename
+
