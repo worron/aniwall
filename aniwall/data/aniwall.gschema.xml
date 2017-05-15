@@ -23,5 +23,17 @@
     <key name="export-height" type="s">
       <default>'1080'</default>
     </key>
+    <key name="palette-extension" type="s">
+      <default>'plt'</default>
+    </key>
+    <child name="ui" schema="com.github.worron.aniwall.ui"/>
+  </schema>
+  <schema id="com.github.worron.aniwall.ui" path="/com/github/worron/aniwall/ui/">
+    <key name="image-offset" type="u">
+      <default>12</default>
+    </key>
+      <key name="min-column-width" type="u">
+      <default>120</default>
+    </key>
   </schema>
 </schemalist>

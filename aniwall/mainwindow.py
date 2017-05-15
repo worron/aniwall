@@ -11,7 +11,7 @@ class MainWindow(GuiBase):
 	def __init__(self, mainapp):
 		self._mainapp = mainapp
 		self._parser = mainapp.parser
-		self.palette_extension = ".plt"
+		self.palette_extension = self._mainapp.settings.get_string("palette-extension")
 
 		# load GUI
 		elements = (
@@ -22,8 +22,8 @@ class MainWindow(GuiBase):
 		)
 		super().__init__("mainwindow.ui", elements=elements, path=self._mainapp.resource_path)
 
-		self.IMAGE_OFFSET = 12
-		self.MIN_COLUMN_WIDTH = 120
+		self.IMAGE_OFFSET = self._mainapp.settings_ui.get_uint("image-offset")
+		self.MIN_COLUMN_WIDTH = self._mainapp.settings_ui.get_uint("min-column-width")
 		self.pixbuf_pattern_width = self.MIN_COLUMN_WIDTH - 24
 
 		self.image_search_text = None
@@ -269,8 +269,8 @@ class MainWindow(GuiBase):
 		"""Action handler"""
 		is_ok, _, filename = self.palette_export_dialog.run(name_suggest="scheme")
 		if is_ok:
-			if not filename.endswith(self.palette_extension):
-				filename = filename + self.palette_extension
+			if not filename.endswith(".%s" % self.palette_extension):
+				filename += ".%s" % self.palette_extension
 			logger.debug("New palette export settings: %s" % filename)
 			self._parser.current.export_colors(filename)
 		else:

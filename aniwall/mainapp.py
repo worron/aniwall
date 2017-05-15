@@ -52,7 +52,11 @@ class MainApp(Gtk.Application):
 				False,
 			)
 			schema = schema_source.lookup("com.github.worron.aniwall", False)
+
 			self.settings = Gio.Settings.new_full(schema, None, None)
+			self.settings_ui = Gio.Settings.new_full(
+				schema_source.lookup("com.github.worron.aniwall.ui", False), None, None
+			)
 		else:
 			# TODO system settings load
 			self.settings, schema = None, None
