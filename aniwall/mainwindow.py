@@ -22,8 +22,9 @@ class MainWindow(GuiBase):
 		)
 		super().__init__("mainwindow.ui", elements=elements, path=self._mainapp.resource_path)
 
-		self.IMAGE_OFFSET = self._mainapp.settings_ui.get_uint("image-offset")
-		self.MIN_COLUMN_WIDTH = self._mainapp.settings_ui.get_uint("min-column-width")
+		settings_ui = self._mainapp.settings.get_child("ui")
+		self.IMAGE_OFFSET = settings_ui.get_uint("image-offset")
+		self.MIN_COLUMN_WIDTH = settings_ui.get_uint("min-column-width")
 		self.pixbuf_pattern_width = self.MIN_COLUMN_WIDTH - 24
 
 		self.image_search_text = None

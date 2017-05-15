@@ -1,4 +1,5 @@
 import os
+import types
 
 from gi.repository import GLib, Gio, Gtk
 from aniwall.logger import logger
@@ -54,12 +55,16 @@ class MainApp(Gtk.Application):
 			schema = schema_source.lookup("com.github.worron.aniwall", False)
 
 			self.settings = Gio.Settings.new_full(schema, None, None)
-			self.settings_ui = Gio.Settings.new_full(
-				schema_source.lookup("com.github.worron.aniwall.ui", False), None, None
-			)
+
+			# FIXME get child for local settings
+			def get_local_child(inst, name):
+				child_schema = inst.get_property("schema") + "." + name
+				return Gio.Settings.new_full(schema_source.lookup(child_schema, False), None, None)
+
+			# noinspection PyArgumentList
+			self.settings.get_child = types.MethodType(get_local_child, self.settings)
 		else:
-			# TODO system settings load
-			self.settings, schema = None, None
+			self.settings = Gio.Settings.new("com.github.worron.aniwall")
 
 		# set initial settings on first run
 		if not self.settings.get_string("export-path"):
@@ -72,6 +77,7 @@ class MainApp(Gtk.Application):
 			)
 
 		if logger.is_debug():
+			schema = self.settings.get_property("settings-schema")
 			settings_list = "\n".join(k + ": " + str(self.settings.get_value(k)) for k in schema.list_keys())
 			logger.debug("Current settings:\n%s", settings_list)
 
