@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from gi.repository import GLib, Gio, Gtk
 from aniwall.logger import logger
@@ -30,7 +29,6 @@ class MainApp(Gtk.Application):
 		# Set data files locations
 		self.path = dict(
 			data=os.path.join(os.path.abspath(os.path.dirname(__file__)), "data"),
-			user=os.path.expanduser("~/.config/aniwall")
 		)
 		if logger.is_debug():
 			logger.debug("Data files location:\n%s", "\n".join(k + ": " + v for k, v in self.path.items()))
@@ -47,22 +45,17 @@ class MainApp(Gtk.Application):
 			logger.debug("List of loaded resources files:\n%s" % resource_files)
 
 		# init settings
-		if not os.path.exists(self.path["user"]):
-			logger.info("Creating user config location:\n%s" % self.path["user"])
-			os.makedirs(self.path["user"])
-
-		user_schema = os.path.join(self.path["user"], "gschemas.compiled")
-		if not os.path.isfile(user_schema):
-			shutil.copyfile(os.path.join(self.path["data"], "gschemas.compiled"), user_schema)
-			logger.info("Set user config location:\n%s" % self.path["user"])
-
-		schema_source = Gio.SettingsSchemaSource.new_from_directory(
-			self.path["data"],
-			Gio.SettingsSchemaSource.get_default(),
-			False,
-		)
-		schema = schema_source.lookup("com.github.worron.aniwall", False)
-		self.settings = Gio.Settings.new_full(schema, None, None)
+		if self.is_local:
+			schema_source = Gio.SettingsSchemaSource.new_from_directory(
+				self.path["data"],
+				Gio.SettingsSchemaSource.get_default(),
+				False,
+			)
+			schema = schema_source.lookup("com.github.worron.aniwall", False)
+			self.settings = Gio.Settings.new_full(schema, None, None)
+		else:
+			# TODO system settings load
+			self.settings, schema = None, None
 
 		# set initial settings on first run
 		if not self.settings.get_string("export-path"):

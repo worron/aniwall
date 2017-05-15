@@ -14,6 +14,7 @@ if is_local:
 # noinspection PyPep8
 from aniwall.mainapp import MainApp
 
+# TODO proper signal handling
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
