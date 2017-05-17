@@ -41,4 +41,3 @@ class FileDialog:
 		# clean up
 		dialog.destroy()
 		return is_ok, path, filename
-

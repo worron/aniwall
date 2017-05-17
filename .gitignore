@@ -10,3 +10,9 @@ images/**
 # Ignore GTK+ binary
 aniwall/data/aniwall.gresource  
 aniwall/data/gschemas.compiled
+
+# Ignore setuptools data
+aniwall.egg-info/*
+build/*
+dist/*
+log.txt

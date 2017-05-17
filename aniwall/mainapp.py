@@ -56,7 +56,7 @@ class MainApp(Gtk.Application):
 
 			self.settings = Gio.Settings.new_full(schema, None, None)
 
-			# FIXME get child for local settings
+			# FIXME: get child for local settings
 			def get_local_child(inst, name):
 				child_schema = inst.get_property("schema") + "." + name
 				return Gio.Settings.new_full(schema_source.lookup(child_schema, False), None, None)
