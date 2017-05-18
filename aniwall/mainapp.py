@@ -70,7 +70,7 @@ class MainApp(Gtk.Application):
 		if not self.settings.get_string("export-path"):
 			self.settings.set_string("export-path", os.path.expanduser("~"))
 
-		if not self.settings.get_strv("images-location-list"):
+		if not self.settings.get_strv("images-location-list") and self.is_local:
 			self.settings.set_strv(
 				"images-location-list",
 				[os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "images")]

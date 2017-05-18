@@ -1,9 +1,16 @@
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf, Gdk
 
 
 def hex_from_rgba(rgba):
 	"""Translate color from Gdk.RGBA to html hex format"""
 	return "#%02X%02X%02X" % tuple([int(getattr(rgba, name) * 255) for name in ("red", "green", "blue")])
+
+
+def rgba_from_hex(hex_):
+	"""Translate color from html hex to Gdk.RGBA"""
+	color = Gdk.RGBA()
+	color.parse(hex_)
+	return color
 
 
 def pixbuf_from_hex(value, width=128, height=16):

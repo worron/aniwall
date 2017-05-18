@@ -3,7 +3,7 @@ import os
 from gi.repository import Gtk, GdkPixbuf, Gio
 from aniwall.dialog import FileDialog
 from aniwall.logger import logger, debuginfo
-from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, pixbuf_from_hex
+from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, pixbuf_from_hex
 
 
 class MainWindow(GuiBase):
@@ -190,13 +190,15 @@ class MainWindow(GuiBase):
 	@debuginfo(False, False)
 	def _on_color_activated(self, tree, path, column):
 		"""GUI handler"""
+		treeiter = self.color_store.get_iter(path)
+
 		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._mainapp.mainwindow.gui["window"], use_alpha=False)
+		color_dialog.set_rgba(rgba_from_hex(self.color_store[treeiter][self.color_view_data.index.HEX]))
 		response = color_dialog.run()
 
 		if response == Gtk.ResponseType.OK:
-			hex_color = hex_from_rgba(color_dialog.get_rgba())
-			treeiter = self.color_store.get_iter(path)
 			color_index = self.color_store[treeiter][self.color_view_data.index.INDEX]
+			hex_color = hex_from_rgba(color_dialog.get_rgba())
 			logger.debug("New color %s in line %s", hex_color, color_index)
 
 			self.color_store[treeiter][self.color_view_data.index.HEX] = hex_color
