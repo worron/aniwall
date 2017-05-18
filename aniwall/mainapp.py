@@ -1,6 +1,7 @@
 import os
 import types
 
+import aniwall.version as version
 from gi.repository import GLib, Gio, Gtk
 from aniwall.logger import logger
 
@@ -18,6 +19,10 @@ class MainApp(Gtk.Application):
 		self.add_main_option(
 			"log-level", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.STRING,
 			"Set log level", "LOG_LEVEL"
+		)
+		self.add_main_option(
+			"version", ord("v"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE,
+			"Show application version", None
 		)
 
 	def _load_resources(self):
@@ -127,15 +132,20 @@ class MainApp(Gtk.Application):
 
 	def do_command_line(self, command_line):
 		if not self.mainwindow:
-			# set log level
 			options = command_line.get_options_dict()
-			log_level = options.lookup_value("log-level").get_string() if options.contains("log-level") else "WARNING"
-			logger.setLevel(log_level)
 
-			# init app structure
-			logger.info("Start aniwall application")
-			self._load_resources()
-			self._do_startup()
+			# set log level
+			level = options.lookup_value("log-level").get_string() if options.contains("log-level") else "WARNING"
+			logger.setLevel(level)
+
+			if options.contains("version"):
+				# show version
+				print(version.get_current())
+			else:
+				# init app structure
+				logger.info("Start aniwall application")
+				self._load_resources()
+				self._do_startup()
 
 		return 0
 
