@@ -32,13 +32,9 @@ _version = version.get_current()
 
 def _do_shell(cmd_list, directory=None):
 	try:
-		output = subprocess.check_output(cmd_list, cwd=directory)
+		subprocess.check_call(cmd_list, cwd=directory)
 	except Exception as e:
 		print("Can't compile resources:\n", e)
-		sys.exit()
-
-	if output:
-		print("Problem during compiling resources:\n", output)
 		sys.exit()
 
 
