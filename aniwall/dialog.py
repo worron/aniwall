@@ -1,6 +1,7 @@
 import os
 
 from gi.repository import Gtk
+import aniwall.version as version
 
 
 class FileDialog:
@@ -41,3 +42,28 @@ class FileDialog:
 		# clean up
 		dialog.destroy()
 		return is_ok, path, filename
+
+
+class AboutDialog:
+	"""Dialog constructor base"""
+	def __init__(self, mainapp):
+		self._mainapp = mainapp
+
+		self.about_dialog = Gtk.AboutDialog(transient_for=self._mainapp.mainwindow.gui["window"])
+		self.about_dialog.set_program_name("Aniwall")
+		# TODO: add application icon
+		self.about_dialog.set_logo(self.about_dialog.render_icon_pixbuf(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG))
+		# noinspection SpellCheckingInspection
+		self.about_dialog.set_authors(["worron\nworrongm@gmailcom\n"])
+		self.about_dialog.set_version(version.get_current())
+		self.about_dialog.set_license_type(Gtk.License.GPL_3_0)
+		self.about_dialog.set_comments("Create user colored wallpaper from patterns.")
+
+		self.about_dialog.connect("response", self._on_close)
+
+	# noinspection PyUnusedLocal
+	def _on_close(self, *args):
+		self.about_dialog.hide()
+
+	def show(self):
+		self.about_dialog.show()

@@ -112,12 +112,14 @@ class MainApp(Gtk.Application):
 		from aniwall.parser import ImageParser
 		from aniwall.mainwindow import MainWindow
 		from aniwall.settings import SettingsWindow
+		from aniwall.dialog import AboutDialog
 
 		# init application modules
 		self.parser = ImageParser(self, os.path.join(self.path["data"], "images", "test.svg"))
 		self.mainwindow = MainWindow(self)
 		self.setwindow = SettingsWindow(self)
 		self.mainwindow.update_image_list()
+		self.aboutdialog = AboutDialog(self)
 
 		# set application menu
 		builder = Gtk.Builder.new_from_resource(self.resource_path + "ui/menu.ui")
@@ -155,9 +157,8 @@ class MainApp(Gtk.Application):
 
 	# noinspection PyUnusedLocal
 	def on_about(self, *args):
-		# about_dialog = Gtk.AboutDialog(transient_for=self.mainwindow.gui["window"], modal=True)
-		# about_dialog.show_all()
-		pass
+		"""Action handler"""
+		self.aboutdialog.show()
 
 	# noinspection PyUnusedLocal
 	def on_quit(self, *args):
