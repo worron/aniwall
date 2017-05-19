@@ -73,7 +73,7 @@ setup(
 	license="GPLv3",
 	author="worron",
 	author_email="worrongm@gmail.com",
-	description="Application for color modding of some specific images",
+	description="Create custom colored wallpaper from pattern",
 	entry_points={"console_scripts": ["aniwall=aniwall.run:run"]},
 	package_data={"aniwall": ["data/images/*.svg", "data/aniwall.gresource", "data/version"]},
 	cmdclass={

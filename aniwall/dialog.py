@@ -2,7 +2,7 @@ import os
 
 from gi.repository import Gtk
 import aniwall.version as version
-from aniwall.logger import logger
+from aniwall.logger import logger, debuginfo
 
 
 class FileDialog:
@@ -14,6 +14,7 @@ class FileDialog:
 		self.action_button = action_button
 		self.homedir = os.path.expanduser("~")
 
+	@debuginfo()
 	def run(self, path_suggest=None, name_suggest=None):
 		"""Activate dialog"""
 		dialog = Gtk.FileChooserDialog(
@@ -55,7 +56,7 @@ class AboutDialog:
 		self.rebuild()
 
 	def _build_dialog(self):
-		self.about_dialog = Gtk.AboutDialog(transient_for=self._mainapp.mainwindow.gui["window"])
+		self.about_dialog = Gtk.AboutDialog(transient_for=self._mainapp.mainwindow.gui["window"], modal=True)
 		self.about_dialog.set_program_name("Aniwall")
 		# TODO: add application icon
 		self.about_dialog.set_logo(self.about_dialog.render_icon_pixbuf(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG))
@@ -63,7 +64,7 @@ class AboutDialog:
 		self.about_dialog.set_authors(["worron <worrongm@gmail.com>"])
 		self.about_dialog.set_version(self._version)
 		self.about_dialog.set_license_type(Gtk.License.GPL_3_0)
-		self.about_dialog.set_comments("Create user colored wallpaper from patterns.")
+		self.about_dialog.set_comments("Create custom colored wallpaper from pattern.")
 
 	def _set_artists(self):
 		credits_ = []
@@ -76,7 +77,7 @@ class AboutDialog:
 		logger.debug("Artist credits for current images:\n%s", credits_)
 
 		if credits_:
-			self.about_dialog.add_credit_section("Wallpapers artists", credits_)
+			self.about_dialog.add_credit_section("Wallpaper artists", credits_)
 
 	# noinspection PyUnusedLocal
 	def _on_close(self, *args):
@@ -91,4 +92,4 @@ class AboutDialog:
 		self.about_dialog.connect("response", self._on_close)
 
 	def show(self):
-		self.about_dialog.show()
+		self.about_dialog.run()
