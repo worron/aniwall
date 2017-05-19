@@ -103,6 +103,7 @@ class SettingsWindow(GuiBase):
 	def _on_image_location_reload_button_clicked(self, button):
 		"""GUI handler"""
 		self._mainwindow.update_image_list()
+		self._mainapp.aboutdialog.rebuild()
 
 	def _on_change_export_type(self, action, value):
 		"""Action handler"""

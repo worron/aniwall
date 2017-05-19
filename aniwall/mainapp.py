@@ -118,8 +118,8 @@ class MainApp(Gtk.Application):
 		self.parser = ImageParser(self, os.path.join(self.path["data"], "images", "test.svg"))
 		self.mainwindow = MainWindow(self)
 		self.setwindow = SettingsWindow(self)
-		self.mainwindow.update_image_list()
 		self.aboutdialog = AboutDialog(self)
+		self.mainwindow.update_image_list()
 
 		# set application menu
 		builder = Gtk.Builder.new_from_resource(self.resource_path + "ui/menu.ui")
