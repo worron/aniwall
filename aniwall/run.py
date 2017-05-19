@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 
+import re
 import os
 import sys
 import gi
 import signal
+
+from aniwall.logger import logger
+
 
 # check gi version
 gi.require_version('Gtk', '3.0')
@@ -13,14 +17,25 @@ is_local = __name__ == "__main__"
 if is_local:
 	sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-# noinspection PyPep8
-from aniwall.mainapp import MainApp
 
 # TODO: proper signal handling
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
+def set_log_level(args):
+	level = re.search("log-level=(\w+)", str(args))
+	try:
+		logger.setLevel(level.group(1))
+	except Exception:
+		logger.setLevel("WARNING")
+
+
 def run():
+	set_log_level(sys.argv)
+
+	# noinspection PyPep8
+	from aniwall.mainapp import MainApp
+
 	app = MainApp(is_local)
 	exit_status = app.run(sys.argv)
 	sys.exit(exit_status)

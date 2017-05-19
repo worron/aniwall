@@ -3,7 +3,12 @@ import types
 
 import aniwall.version as version
 from gi.repository import GLib, Gio, Gtk
-from aniwall.logger import logger
+
+from aniwall.logger import logger, debuginfo
+from aniwall.parser import ImageParser
+from aniwall.mainwindow import MainWindow
+from aniwall.settings import SettingsWindow
+from aniwall.dialog import AboutDialog
 
 
 class MainApp(Gtk.Application):
@@ -17,7 +22,7 @@ class MainApp(Gtk.Application):
 		self.resource_path = "/com/github/worron/aniwall/"
 
 		self.add_main_option(
-			"log-level", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.STRING,
+			"log-level", 0, GLib.OptionFlags.NONE, GLib.OptionArg.STRING,
 			"Set log level", "LOG_LEVEL"
 		)
 		self.add_main_option(
@@ -26,10 +31,7 @@ class MainApp(Gtk.Application):
 		)
 
 	def _load_resources(self):
-		"""
-		Initialize resources.
-		Use this one to make all setup AFTER command line parsing completed.
-		"""
+		"""Initialize resources"""
 		logger.info("Loading resources...")
 
 		# Set data files locations
@@ -89,10 +91,7 @@ class MainApp(Gtk.Application):
 		logger.info("Loading resources completed")
 
 	def _do_startup(self):
-		"""
-		Initialize application structure.
-		Use this one to make all setup AFTER command line parsing completed.
-		"""
+		"""Initialize application structure"""
 		logger.info("Application modules initialization...")
 
 		# set application actions
@@ -107,12 +106,6 @@ class MainApp(Gtk.Application):
 		action = Gio.SimpleAction.new("settings", None)
 		action.connect("activate", self.on_settings)
 		self.add_action(action)
-
-		# lazy import application modules
-		from aniwall.parser import ImageParser
-		from aniwall.mainwindow import MainWindow
-		from aniwall.settings import SettingsWindow
-		from aniwall.dialog import AboutDialog
 
 		# init application modules
 		self.parser = ImageParser(self, os.path.join(self.path["data"], "images", "test.svg"))
@@ -136,10 +129,6 @@ class MainApp(Gtk.Application):
 		if not self.mainwindow:
 			options = command_line.get_options_dict()
 
-			# set log level
-			level = options.lookup_value("log-level").get_string() if options.contains("log-level") else "WARNING"
-			logger.setLevel(level)
-
 			if options.contains("version"):
 				# show version
 				print(version.get_current())
@@ -156,14 +145,17 @@ class MainApp(Gtk.Application):
 		Gtk.Application.do_shutdown(self)
 
 	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
 	def on_about(self, *args):
 		"""Action handler"""
 		self.aboutdialog.show()
 
 	# noinspection PyUnusedLocal
 	def on_quit(self, *args):
+		"""Action handler"""
 		self.quit()
 
 	# noinspection PyUnusedLocal
 	def on_settings(self, *args):
+		"""Action handler"""
 		self.setwindow.show()
