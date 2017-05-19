@@ -30,6 +30,8 @@ class MainApp(Gtk.Application):
 			"Show application version", None
 		)
 
+		self.connect("handle-local-options", self._on_handle_local_options)
+
 	def _load_resources(self):
 		"""Initialize resources"""
 		logger.info("Loading resources...")
@@ -125,24 +127,31 @@ class MainApp(Gtk.Application):
 		self.mainwindow.gui["window"].show_all()
 		self.mainwindow.update_preview()
 
-	def do_command_line(self, command_line):
+	def do_activate(self):
 		if not self.mainwindow:
-			options = command_line.get_options_dict()
+			logger.info("Start aniwall application")
+			self._load_resources()
+			self._do_startup()
 
-			if options.contains("version"):
-				# show version
-				print(version.get_current())
-			else:
-				# init app structure
-				logger.info("Start aniwall application")
-				self._load_resources()
-				self._do_startup()
+		self.mainwindow.gui["window"].present()
+
+	def do_command_line(self, command_line):
+		options = command_line.get_options_dict()
+		if not options.contains("version"):
+			self.activate()
 
 		return 0
 
 	def do_shutdown(self):
 		logger.info("Exit aniwall application")
 		Gtk.Application.do_shutdown(self)
+
+	# noinspection PyMethodMayBeStatic
+	def _on_handle_local_options(self, _, options):
+		"""GUI handler"""
+		if options.contains("version"):
+			print(version.get_current())
+		return -1
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
