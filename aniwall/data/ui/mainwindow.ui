@@ -161,7 +161,7 @@
             <property name="spacing">18</property>
             <child>
               <object class="GtkScrolledWindow" id="image-list-scrolledwindow">
-                <property name="hscrollbar_policy">never</property>
+                <!--<property name="hscrollbar_policy">never</property>-->
                 <child>
                   <object class="GtkTreeView" id="image-list-treeview">
                     <!--<property name="headers_visible">False</property>-->
@@ -180,7 +180,7 @@
             <child>
               <object class="GtkScrolledWindow" id="color-list-scrolledwindow">
                 <property name="hscrollbar_policy">never</property>
-                <property name="width_request">400</property>
+                <!--<property name="width_request">400</property>-->
                 <child>
                   <object class="GtkTreeView" id="color-list-treeview">
                     <child internal-child="selection">

@@ -24,8 +24,12 @@ class MainWindow(GuiBase):
 
 		settings_ui = self._mainapp.settings.get_child("ui")
 		self.IMAGE_OFFSET = settings_ui.get_uint("image-offset")
-		self.MIN_COLUMN_WIDTH = settings_ui.get_uint("min-column-width")
-		self.pixbuf_pattern_width = self.MIN_COLUMN_WIDTH - 24
+		self.COLOR_VIEW_WIDTH = settings_ui.get_uint("color-view-width")
+		self.MIN_COLOR_COLUMN_WIDTH = int(self.COLOR_VIEW_WIDTH / 2)
+		self.IMAGE_COLUMN_WIDTH = settings_ui.get_uint("image-column-width")
+		self.PIXBUF_PATTERN_WIDTH = self.MIN_COLOR_COLUMN_WIDTH - 24
+
+		self.gui["color-list-scrolledwindow"].set_property("width_request", self.COLOR_VIEW_WIDTH)
 
 		self.image_search_text = None
 
@@ -92,7 +96,7 @@ class MainWindow(GuiBase):
 		# image list store
 		self.image_view_data.build_columns(
 			self.gui["image-list-treeview"],
-			min_width=self.MIN_COLUMN_WIDTH
+			resizable=True
 		)
 
 		self.image_store = self.image_view_data.build_store()
@@ -100,15 +104,25 @@ class MainWindow(GuiBase):
 		self.image_store_filter.set_visible_func(self._image_search_filter_func)
 		self.gui["image-list-treeview"].set_model(self.image_store_filter)
 
+		self.image_column = self.gui["image-list-treeview"].get_column(self.image_view_data.index.NAME)
+		self.image_column.set_fixed_width(self.IMAGE_COLUMN_WIDTH)
+
 		# image colors store
-		max_column_width = self.gui["color-list-scrolledwindow"].get_property("width_request") - self.MIN_COLUMN_WIDTH
 		self.color_view_data.build_columns(
 			self.gui["color-list-treeview"],
-			min_width=self.MIN_COLUMN_WIDTH, max_width=max_column_width, resizable=True
+			min_width=self.MIN_COLOR_COLUMN_WIDTH
 		)
 
 		self.color_store = self.color_view_data.build_store()
 		self.gui["color-list-treeview"].set_model(self.color_store)
+
+	@debuginfo(False, False)
+	def save_gui_state(self):
+		"""Save some GUI parameters across sessions"""
+		image_column_width = self.image_column.get_width()
+		settings_ui = self._mainapp.settings.get_child("ui")
+		settings_ui.set_uint("image-column-width", image_column_width)
+		logger.debug("image-column-width: %d", image_column_width)
 
 	@debuginfo(False, False)
 	def update_image_list(self):
@@ -126,7 +140,7 @@ class MainWindow(GuiBase):
 		"""Set color palette for GUI treeview"""
 		self.color_store.clear()
 		for line in self._parser.current.get_palette():
-			pixbuf = pixbuf_from_hex(line["hex"], width=self.pixbuf_pattern_width)
+			pixbuf = pixbuf_from_hex(line["hex"], width=self.PIXBUF_PATTERN_WIDTH)
 			self.color_store.append([line["index"], line["name"], pixbuf, line["hex"]])
 
 		self.gui["color-list-treeview"].set_cursor(0)
@@ -203,7 +217,7 @@ class MainWindow(GuiBase):
 
 			self.color_store[treeiter][self.color_view_data.index.HEX] = hex_color
 			self.color_store[treeiter][self.color_view_data.index.COLOR] = pixbuf_from_hex(
-				hex_color, width=self.pixbuf_pattern_width
+				hex_color, width=self.PIXBUF_PATTERN_WIDTH
 			)
 			self._parser.current.change_color(hex_color, color_index)
 			self._parser.apply_changes()

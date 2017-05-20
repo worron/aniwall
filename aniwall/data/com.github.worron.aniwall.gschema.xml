@@ -32,8 +32,11 @@
     <key name="image-offset" type="u">
       <default>12</default>
     </key>
-      <key name="min-column-width" type="u">
-      <default>120</default>
+    <key name="image-column-width" type="u">
+      <default>500</default>
+    </key>
+    <key name="color-view-width" type="u">
+      <default>300</default>
     </key>
   </schema>
 </schemalist>

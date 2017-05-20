@@ -1,4 +1,4 @@
-from gi.repository import Gtk, GdkPixbuf, Gdk
+from gi.repository import Gtk, GdkPixbuf, Gdk, Pango
 
 
 def hex_from_rgba(rgba):
@@ -54,7 +54,7 @@ class TreeViewData:
 		for i, item in enumerate(self.data):
 			column = Gtk.TreeViewColumn(
 				item.get("title"),
-				item.get("render", Gtk.CellRendererText()),
+				item.get("render", Gtk.CellRendererText(ellipsize=Pango.EllipsizeMode.END)),
 				**{item.get("attr", "text"): i}
 			)
 			column.set_visible(item.get("visible", True))

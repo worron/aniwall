@@ -144,6 +144,7 @@ class MainApp(Gtk.Application):
 
 	def do_shutdown(self):
 		logger.info("Exit aniwall application")
+		self.mainwindow.save_gui_state()
 		Gtk.Application.do_shutdown(self)
 
 	# noinspection PyMethodMayBeStatic
