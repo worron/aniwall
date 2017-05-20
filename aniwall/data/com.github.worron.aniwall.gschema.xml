@@ -3,9 +3,17 @@
   <schema id="com.github.worron.aniwall" path="/com/github/worron/aniwall/">
     <key name="images-location-list" type="as">
       <default>[]</default>
+      <summary>Wallpaper pattern locations</summary>
+      <description>
+        List if directories to scan for wallpaper patterns.
+      </description>
     </key>
     <key name="export-path" type="s">
       <default>''</default>
+      <summary>Export path</summary>
+      <description>
+        Default directory for saving modified images.
+      </description>
     </key>
     <key name="export-type" type="s">
       <choices>
@@ -16,27 +24,55 @@
         <choice value='bmp'/>
       </choices>
       <default>'png'</default>
+      <summary>Exported image type</summary>
+      <description>
+        Type by extension for modified images.
+      </description>
     </key>
     <key name="export-width" type="s">
       <default>'1920'</default>
+      <summary>Exported image width</summary>
+      <description>
+        Size setting for modified images.
+      </description>
     </key>
     <key name="export-height" type="s">
       <default>'1080'</default>
+      <summary>Exported image height</summary>
+      <description>
+        Size setting for modified images.
+      </description>
     </key>
     <key name="palette-extension" type="s">
       <default>'plt'</default>
+      <summary>Extension of palette file</summary>
+      <description>
+        User defined palette can be saved to files with given extension. Files format is plain text ini anyway.
+      </description>
     </key>
     <child name="ui" schema="com.github.worron.aniwall.ui"/>
   </schema>
   <schema id="com.github.worron.aniwall.ui" path="/com/github/worron/aniwall/ui/">
     <key name="image-offset" type="u">
       <default>12</default>
+      <summary>Image preview edges offset</summary>
+      <description>
+        Application GUI settings
+      </description>
     </key>
     <key name="image-column-width" type="u">
       <default>500</default>
+      <summary>Width of first column of images list view</summary>
+      <description>
+        Application GUI settings. This parameter updated on application exit savings current value.
+      </description>
     </key>
     <key name="color-view-width" type="u">
       <default>300</default>
+      <summary>Width of colors list view</summary>
+      <description>
+        Application GUI settings.
+      </description>
     </key>
   </schema>
 </schemalist>
