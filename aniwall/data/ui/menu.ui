@@ -6,14 +6,14 @@
         <attribute name="label" >Image</attribute>
         <section>
           <item>
-            <attribute name="action">palette.reset</attribute>
-            <attribute name="label">_Reset Changes</attribute>
-            <attribute name="accel">&lt;Primary&gt;r</attribute>
-          </item>
-          <item>
             <attribute name="action">palette.save</attribute>
             <attribute name="label">_Save Changes</attribute>
-            <attribute name="accel">&lt;Primary&gt;s</attribute>
+            <attribute name="accel">&lt;Control&gt;s</attribute>
+          </item>
+          <item>
+            <attribute name="action">palette.reset</attribute>
+            <attribute name="label">_Reset Changes</attribute>
+            <attribute name="accel">&lt;Control&gt;r</attribute>
           </item>
         </section>
       </submenu>
@@ -33,7 +33,7 @@
       <item>
         <attribute name="action">app.settings</attribute>
         <attribute name="label" translatable="yes">_Preferences</attribute>
-        <attribute name="accel">&lt;Primary&gt;p</attribute>
+        <attribute name="accel">&lt;Control&gt;p</attribute>
       </item>
     </section>
     <section>
@@ -44,7 +44,7 @@
       <item>
         <attribute name="action">app.quit</attribute>
         <attribute name="label" translatable="yes">_Quit</attribute>
-        <attribute name="accel">&lt;Primary&gt;q</attribute>
+        <attribute name="accel">&lt;Control&gt;q</attribute>
       </item>
     </section>
   </menu>

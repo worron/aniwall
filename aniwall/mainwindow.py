@@ -76,6 +76,16 @@ class MainWindow(GuiBase):
 		for prefix, group in self.actions.items():
 			self.gui["window"].insert_action_group(prefix, group)
 
+		# accelerators
+		self.accelerators = Gtk.AccelGroup()
+		self.gui["window"].add_accel_group(self.accelerators)
+		self.accelerators.connect(
+			*Gtk.accelerator_parse("<Control>e"), Gtk.AccelFlags.VISIBLE, self._on_export_button_clicked
+		)
+		self.accelerators.connect(
+			*Gtk.accelerator_parse("<Control><Shift>e"), Gtk.AccelFlags.VISIBLE, self._on_export_as_button_clicked
+		)
+
 		# signals
 		self.handler = {}
 		self.handler["selection"] = self.gui["image-list-selection"].connect(
@@ -244,13 +254,13 @@ class MainWindow(GuiBase):
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
-	def _on_export_button_clicked(self, button):
+	def _on_export_button_clicked(self, *args):
 		"""GUI handler"""
 		self._parser.export_image()
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
-	def _on_export_as_button_clicked(self, button):
+	def _on_export_as_button_clicked(self, *args):
 		"""GUI handler"""
 		is_ok, path, filename = self.export_dialog.run(
 			self._mainapp.settings.get_string("export-path"),
