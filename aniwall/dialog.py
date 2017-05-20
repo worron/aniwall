@@ -46,6 +46,27 @@ class FileDialog:
 		return is_ok, path, filename
 
 
+class ConfirmDialog:
+	"""Confirm message dialog"""
+	def __init__(self, parent, message=""):
+		self.parent = parent
+		self.message = message
+
+	@debuginfo(input_log=False)
+	def run(self):
+		"""Activate dialog"""
+		dialog = Gtk.MessageDialog(
+			self.parent, Gtk.DialogFlags.MODAL,
+			Gtk.MessageType.QUESTION, Gtk.ButtonsType.OK_CANCEL, self.message
+		)
+
+		response = dialog.run()
+		is_ok = response == Gtk.ResponseType.OK
+		dialog.destroy()
+
+		return is_ok
+
+
 class AboutDialog:
 	"""About dialog manager"""
 	def __init__(self, mainapp):

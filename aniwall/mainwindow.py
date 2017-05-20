@@ -1,9 +1,15 @@
 import os
 
 from gi.repository import Gtk, GdkPixbuf, Gio
-from aniwall.dialog import FileDialog
+from aniwall.dialog import FileDialog, ConfirmDialog
 from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, pixbuf_from_hex
+
+# TODO: color moving inside palette
+# TODO: respect image aspect option
+# TODO: More GUI settings
+# TODO: GUI tooltips
+# TODO: GUI translation (?)
 
 
 class MainWindow(GuiBase):
@@ -59,6 +65,11 @@ class MainWindow(GuiBase):
 		self.palette_import_dialog = FileDialog(
 			self.gui["window"], "Import color palette",
 			Gtk.FileChooserAction.OPEN, Gtk.STOCK_OPEN,
+		)
+
+		self.confirm_dialog = ConfirmDialog(
+			self.gui["window"],
+			"Are you sure you want to modify wallpaper pattern?\nOriginal colors and image geometry will be lost."
 		)
 
 		# set application main window
@@ -316,5 +327,7 @@ class MainWindow(GuiBase):
 	@debuginfo(False, False)
 	def _on_palette_save(self, *args):
 		"""Action handler"""
-		self._parser.save_changes()
-		self._set_subtitle()
+		confirmed = self.confirm_dialog.run()
+		if confirmed:
+			self._parser.save_changes()
+			self._set_subtitle()
