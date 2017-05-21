@@ -11,7 +11,7 @@ from aniwall.settings import SettingsWindow
 from aniwall.dialog import AboutDialog
 
 
-class MainApp(Gtk.Application):
+class Application(Gtk.Application):
 	"""Main application class"""
 	def __init__(self, is_local):
 		super().__init__(

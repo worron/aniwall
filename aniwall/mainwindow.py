@@ -14,10 +14,10 @@ from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, 
 
 class MainWindow(GuiBase):
 	"""Main window constructor"""
-	def __init__(self, mainapp):
-		self._mainapp = mainapp
-		self._parser = mainapp.parser
-		self.palette_extension = self._mainapp.settings.get_string("palette-extension")
+	def __init__(self, app):
+		self._app = app
+		self._parser = app.parser
+		self.palette_extension = self._app.settings.get_string("palette-extension")
 
 		# load GUI
 		elements = (
@@ -26,9 +26,9 @@ class MainWindow(GuiBase):
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
 			"scale-spinbutton", "color-list-scrolledwindow", "export-button", "export-as-button",
 		)
-		super().__init__("mainwindow.ui", elements=elements, path=self._mainapp.resource_path)
+		super().__init__("mainwindow.ui", elements=elements, path=self._app.resource_path)
 
-		settings_ui = self._mainapp.settings.get_child("ui")
+		settings_ui = self._app.settings.get_child("ui")
 		self.IMAGE_OFFSET = settings_ui.get_uint("image-offset")
 		self.COLOR_VIEW_WIDTH = settings_ui.get_uint("color-view-width")
 		self.MIN_COLOR_COLUMN_WIDTH = int(self.COLOR_VIEW_WIDTH / 2)
@@ -73,7 +73,7 @@ class MainWindow(GuiBase):
 		)
 
 		# set application main window
-		self.gui["window"].set_application(mainapp)
+		self.gui["window"].set_application(app)
 
 		# system clipboard
 		self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
@@ -147,14 +147,14 @@ class MainWindow(GuiBase):
 	def save_gui_state(self):
 		"""Save some GUI parameters across sessions"""
 		image_column_width = self.image_column.get_width()
-		settings_ui = self._mainapp.settings.get_child("ui")
+		settings_ui = self._app.settings.get_child("ui")
 		settings_ui.set_uint("image-column-width", image_column_width)
 		logger.debug("image-column-width: %d", image_column_width)
 
 	@debuginfo(False, False)
 	def update_image_list(self):
 		"""Set list of SVG images for GUI treeview"""
-		self._parser.load_images(*self._mainapp.settings.get_strv("images-location-list"))
+		self._parser.load_images(*self._app.settings.get_strv("images-location-list"))
 		with self.gui["image-list-selection"].handler_block(self.handler["selection"]):
 			self.image_store.clear()
 			for i, image in enumerate(self._parser.image_list):
@@ -243,7 +243,7 @@ class MainWindow(GuiBase):
 		"""GUI handler"""
 		treeiter = self.color_store.get_iter(path)
 
-		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._mainapp.mainwindow.gui["window"], use_alpha=False)
+		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._app.mainwindow.gui["window"], use_alpha=False)
 		color_dialog.set_rgba(rgba_from_hex(self.color_store[treeiter][self.color_view_data.index.HEX]))
 		response = color_dialog.run()
 
@@ -290,12 +290,12 @@ class MainWindow(GuiBase):
 	def _on_export_as_button_clicked(self, *args):
 		"""GUI handler"""
 		is_ok, path, filename = self.export_dialog.run(
-			self._mainapp.settings.get_string("export-path"),
+			self._app.settings.get_string("export-path"),
 			self._parser.current.name
 		)
 		if is_ok:
 			name = os.path.splitext(os.path.basename(filename))[0]
-			self._mainapp.settings.set_string("export-path", path)
+			self._app.settings.set_string("export-path", path)
 			self._parser.current.name = name
 			self._parser.export_image()
 			logger.debug("New image export settings: [path: %s], [name: %s]" % (path, name))
