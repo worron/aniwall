@@ -8,7 +8,7 @@ class SettingsWindow(GuiBase):
 	"""Settings window constructor"""
 	def __init__(self, app):
 		self._app = app
-		self._mainwindow = app.mainwindow
+		self._mainwin = app.mainwin
 
 		# load GUI
 		elements = (
@@ -102,7 +102,7 @@ class SettingsWindow(GuiBase):
 	@debuginfo(False, False)
 	def _on_image_location_reload_button_clicked(self, button):
 		"""GUI handler"""
-		self._mainwindow.update_image_list()
+		self._mainwin.update_image_list()
 		self._app.aboutdialog.rebuild()
 
 	def _on_change_export_type(self, action, value):

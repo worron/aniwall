@@ -243,7 +243,7 @@ class MainWindow(GuiBase):
 		"""GUI handler"""
 		treeiter = self.color_store.get_iter(path)
 
-		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._app.mainwindow.gui["window"], use_alpha=False)
+		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._app.mainwin.gui["window"], use_alpha=False)
 		color_dialog.set_rgba(rgba_from_hex(self.color_store[treeiter][self.color_view_data.index.HEX]))
 		response = color_dialog.run()
 

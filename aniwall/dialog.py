@@ -77,7 +77,7 @@ class AboutDialog:
 		self.rebuild()
 
 	def _build_dialog(self):
-		self.about_dialog = Gtk.AboutDialog(transient_for=self._app.mainwindow.gui["window"], modal=True)
+		self.about_dialog = Gtk.AboutDialog(transient_for=self._app.mainwin.gui["window"], modal=True)
 		self.about_dialog.set_program_name("Aniwall")
 		# TODO: add application icon
 		self.about_dialog.set_logo(self.about_dialog.render_icon_pixbuf(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG))
