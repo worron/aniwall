@@ -4,7 +4,7 @@ import subprocess
 
 from aniwall.logger import logger
 
-_FALLBACK_VERSION = 0.6
+_FALLBACK_VERSION = 0.8
 _version_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "version")
 
 

@@ -79,12 +79,6 @@ class MainApp(Gtk.Application):
 		if not self.settings.get_string("export-path"):
 			self.settings.set_string("export-path", os.path.expanduser("~"))
 
-		if not self.settings.get_strv("images-location-list") and self.is_local:
-			self.settings.set_strv(
-				"images-location-list",
-				[os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "images")]
-			)
-
 		if logger.is_debug():
 			schema = self.settings.get_property("settings-schema")
 			settings_list = "\n".join(k + ": " + str(self.settings.get_value(k)) for k in schema.list_keys())
