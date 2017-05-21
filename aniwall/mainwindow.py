@@ -1,6 +1,6 @@
 import os
 
-from gi.repository import Gtk, GdkPixbuf, Gio
+from gi.repository import Gtk, GdkPixbuf, Gio, Gdk
 from aniwall.dialog import FileDialog, ConfirmDialog
 from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, pixbuf_from_hex
@@ -75,6 +75,9 @@ class MainWindow(GuiBase):
 		# set application main window
 		self.gui["window"].set_application(mainapp)
 
+		# system clipboard
+		self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+
 		# actions
 		self.actions = {}
 		self.actions["palette"] = Gio.SimpleActionGroup()
@@ -95,6 +98,9 @@ class MainWindow(GuiBase):
 		)
 		self.accelerators.connect(
 			*Gtk.accelerator_parse("<Control><Shift>e"), Gtk.AccelFlags.VISIBLE, self._on_export_as_button_clicked
+		)
+		self.accelerators.connect(
+			*Gtk.accelerator_parse("<Control>c"), Gtk.AccelFlags.VISIBLE, self.save_color_to_clipboard
 		)
 
 		# signals
@@ -176,6 +182,16 @@ class MainWindow(GuiBase):
 				True
 			)
 			self.gui["preview"].set_from_pixbuf(pixbuf)
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def save_color_to_clipboard(self, *args):
+		"""Save text representation of selected color to system clipboard"""
+		model, sel = self.gui["color-list-selection"].get_selected()
+		if sel is not None:
+			color = model[sel][self.color_view_data.index.HEX]
+			logger.debug("Copy to clipboard: %s", color)
+			self.clipboard.set_text(color, -1)
 
 	# noinspection PyUnusedLocal
 	def _image_search_filter_func(self, model, treeiter, data):
