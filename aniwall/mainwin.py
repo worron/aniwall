@@ -7,7 +7,6 @@ from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, 
 
 # TODO: color moving inside palette
 # TODO: respect image aspect option
-# TODO: More GUI settings
 # TODO: GUI translation (?)
 
 
@@ -23,11 +22,15 @@ class MainWindow(GuiBase):
 			"window", "headerbar", "image-box", "image-list-treeview", "image-list-selection",
 			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
-			"scale-spinbutton", "color-list-scrolledwindow", "export-button", "export-as-button",
+			"scale-spinbutton", "color-list-scrolledwindow", "export-button", "export-as-button", "list-box",
 		)
 		super().__init__("mainwindow.ui", elements=elements, path=self._app.resource_path)
 
+		# set some gui sizes from settings
 		settings_ui = self._app.settings.get_child("ui")
+		self.gui["window"].set_default_size(*settings_ui.get_value("window-size"))
+		self.gui["list-box"].set_property("height_request", settings_ui.get_uint("list-box-height"))
+
 		self.IMAGE_OFFSET = settings_ui.get_uint("image-offset")
 		self.COLOR_VIEW_WIDTH = settings_ui.get_uint("color-view-width")
 		self.MIN_COLOR_COLUMN_WIDTH = int(self.COLOR_VIEW_WIDTH / 2)
