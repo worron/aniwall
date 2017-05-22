@@ -208,6 +208,12 @@ class MainWindow(GuiBase):
 		sub_title = "%s [modified]" % self._parser.current.name if modded else self._parser.current.name
 		self.gui["headerbar"].set_subtitle(sub_title)
 
+	def _update_gui_image_data(self):
+		"""Full up gui image geometry controllers with current data"""
+		self.gui["scale-spinbutton"].set_value(float(self._parser.current.scale))
+		self.gui["shift-x-spinbutton"].set_value(float(self._parser.current.shift[0]))
+		self.gui["shift-y-spinbutton"].set_value(float(self._parser.current.shift[1]))
+
 	@debuginfo(False, False)
 	def _on_image_selection_changed(self, selection):
 		"""GUI handler"""
@@ -221,9 +227,7 @@ class MainWindow(GuiBase):
 			# update title
 			self._set_subtitle()
 			# update image data
-			self.gui["scale-spinbutton"].set_value(float(self._parser.current.scale))
-			self.gui["shift-x-spinbutton"].set_value(float(self._parser.current.shift[0]))
-			self.gui["shift-y-spinbutton"].set_value(float(self._parser.current.shift[1]))
+			self._update_gui_image_data()
 
 	# noinspection PyUnusedLocal
 	def _on_image_resize(self, window, rectangle):
@@ -339,6 +343,7 @@ class MainWindow(GuiBase):
 		self._parser.reset_changes()
 		self.update_preview()
 		self.update_color_list()
+		self._update_gui_image_data()
 		self._set_subtitle()
 
 	# noinspection PyUnusedLocal
