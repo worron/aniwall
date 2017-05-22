@@ -62,6 +62,7 @@
             </child>
             <child>
               <object class="GtkButton" id="export-button">
+                <property name="tooltip_text">Export image</property>
                 <child>
                   <object class="GtkImage" id="save-image">
                     <property name="can_focus">False</property>
@@ -81,6 +82,7 @@
             <child>
               <object class="GtkButton" id="export-as-button">
                 <property name="margin_right">6</property>
+                <property name="tooltip_text">Export image as</property>
                 <child>
                   <object class="GtkImage" id="save-as-image">
                     <property name="can_focus">False</property>
@@ -101,6 +103,7 @@
               <object class="GtkSpinButton" id="shift-y-spinbutton">
                 <property name="adjustment">shift-y-spinbutton-adjustment</property>
                 <property name="margin_right">6</property>
+                <property name="tooltip_text">Image vertical shift</property>
               </object>
               <packing>
                 <property name="pack_type">end</property>
@@ -109,6 +112,7 @@
             <child>
               <object class="GtkSpinButton" id="shift-x-spinbutton">
                 <property name="adjustment">shift-x-spinbutton-adjustment</property>
+                <property name="tooltip_text">Image horizontal shift</property>
               </object>
               <packing>
                 <property name="pack_type">end</property>
@@ -128,6 +132,7 @@
                 <property name="adjustment">scale-spinbutton-adjustment</property>
                 <property name="digits">2</property>
                 <property name="margin_right">12</property>
+                <property name="tooltip_text">Image scale</property>
               </object>
               <packing>
                 <property name="pack_type">end</property>

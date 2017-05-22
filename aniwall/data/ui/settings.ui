@@ -36,6 +36,7 @@
             </child>
             <child>
               <object class="GtkMenuButton" id="export-type-menu-button">
+                <property name="tooltip_text">Image type</property>
                 <child>
                   <object class="GtkImage" id="system-icon">
                     <property name="icon-name">emblem-system-symbolic</property>
@@ -48,6 +49,7 @@
             </child>
             <child>
               <object class="GtkSpinButton" id="export-height-spinbutton">
+                <property name="tooltip_text">Image height</property>
                 <property name="adjustment">export-height-spinbutton-adjustment</property>
               </object>
               <packing>
@@ -56,6 +58,7 @@
             </child>
             <child>
               <object class="GtkSpinButton" id="export-width-spinbutton">
+                <property name="tooltip_text">Image width</property>
                 <property name="adjustment">export-width-spinbutton-adjustment</property>
               </object>
               <packing>
@@ -89,6 +92,7 @@
             </child>
             <child>
               <object class="GtkButton" id="image-location-add-button">
+                <property name="tooltip_text">Add images location directory to list</property>
                 <child>
                   <object class="GtkImage" id="add-image">
                     <property name="can_focus">False</property>
@@ -107,6 +111,7 @@
             </child>
             <child>
               <object class="GtkButton" id="image-location-remove-button">
+                <property name="tooltip_text">Remove selected images location directory</property>
                 <child>
                   <object class="GtkImage" id="remove-image">
                     <property name="can_focus">False</property>
@@ -125,6 +130,7 @@
             </child>
             <child>
               <object class="GtkButton" id="image-location-reload-button">
+                <property name="tooltip_text">Rescan all listed directories</property>
                 <child>
                   <object class="GtkImage" id="reload-image">
                     <property name="can_focus">False</property>
