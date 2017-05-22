@@ -77,6 +77,10 @@ class ImageData:
 		if file_ is None:
 			file_ = self.file
 
+		if not os.access(file_, os.W_OK):
+			logger.warning("Permission denied to change %s", file_)
+			return
+
 		transform_data = (self.shift[0], self.shift[1], self.scale)
 		self.tags["transform"].set("transform", "translate(%s,%s) scale(%s)" % transform_data)
 		self.tags["background"].set("fill", self.bg)
