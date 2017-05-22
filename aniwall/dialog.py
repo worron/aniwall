@@ -69,15 +69,15 @@ class ConfirmDialog:
 
 class AboutDialog:
 	"""About dialog manager"""
-	def __init__(self, mainapp):
-		self._mainapp = mainapp
+	def __init__(self, app):
+		self._app = app
 		self._version = version.get_current()
 		self.about_dialog = None
 
 		self.rebuild()
 
 	def _build_dialog(self):
-		self.about_dialog = Gtk.AboutDialog(transient_for=self._mainapp.mainwindow.gui["window"], modal=True)
+		self.about_dialog = Gtk.AboutDialog(transient_for=self._app.mainwin.gui["window"], modal=True)
 		self.about_dialog.set_program_name("Aniwall")
 		# TODO: add application icon
 		self.about_dialog.set_logo(self.about_dialog.render_icon_pixbuf(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG))
@@ -89,7 +89,7 @@ class AboutDialog:
 
 	def _set_artists(self):
 		credits_ = []
-		for path in self._mainapp.settings.get_strv("images-location-list"):
+		for path in self._app.settings.get_strv("images-location-list"):
 			file_ = os.path.join(path, "credits")
 			if os.path.isfile(file_):
 				with open(file_, "r") as credits_file:

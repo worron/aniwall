@@ -34,9 +34,9 @@ def run():
 	set_log_level(sys.argv)
 
 	# noinspection PyPep8
-	from aniwall.mainapp import MainApp
+	from aniwall.application import Application
 
-	app = MainApp(is_local)
+	app = Application(is_local)
 	exit_status = app.run(sys.argv)
 	sys.exit(exit_status)
 

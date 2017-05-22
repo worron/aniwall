@@ -6,19 +6,19 @@ from gi.repository import GLib, Gio, Gtk
 
 from aniwall.logger import logger, debuginfo
 from aniwall.parser import ImageParser
-from aniwall.mainwindow import MainWindow
+from aniwall.mainwin import MainWindow
 from aniwall.settings import SettingsWindow
 from aniwall.dialog import AboutDialog
 
 
-class MainApp(Gtk.Application):
+class Application(Gtk.Application):
 	"""Main application class"""
 	def __init__(self, is_local):
 		super().__init__(
 			application_id="com.github.worron.aniwall", flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
 		)
 		self.is_local = is_local
-		self.mainwindow = None
+		self.mainwin = None
 		self.resource_path = "/com/github/worron/aniwall/"
 
 		self.add_main_option(
@@ -105,10 +105,10 @@ class MainApp(Gtk.Application):
 
 		# init application modules
 		self.parser = ImageParser(self, os.path.join(self.path["data"], "images", "test.svg"))
-		self.mainwindow = MainWindow(self)
+		self.mainwin = MainWindow(self)
 		self.setwindow = SettingsWindow(self)
 		self.aboutdialog = AboutDialog(self)
-		self.mainwindow.update_image_list()
+		self.mainwin.update_image_list()
 
 		# set application menu
 		builder = Gtk.Builder.new_from_resource(self.resource_path + "ui/menu.ui")
@@ -118,16 +118,16 @@ class MainApp(Gtk.Application):
 
 		# show window
 		logger.info("Application GUI startup")
-		self.mainwindow.gui["window"].show_all()
-		self.mainwindow.update_preview()
+		self.mainwin.gui["window"].show_all()
+		self.mainwin.update_preview()
 
 	def do_activate(self):
-		if not self.mainwindow:
+		if not self.mainwin:
 			logger.info("Start aniwall application")
 			self._load_resources()
 			self._do_startup()
 
-		self.mainwindow.gui["window"].present()
+		self.mainwin.gui["window"].present()
 
 	def do_command_line(self, command_line):
 		options = command_line.get_options_dict()
@@ -138,7 +138,7 @@ class MainApp(Gtk.Application):
 
 	def do_shutdown(self):
 		logger.info("Exit aniwall application")
-		self.mainwindow.save_gui_state()
+		self.mainwin.save_gui_state()
 		Gtk.Application.do_shutdown(self)
 
 	# noinspection PyMethodMayBeStatic

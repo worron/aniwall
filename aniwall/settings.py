@@ -6,9 +6,9 @@ from aniwall.logger import logger, debuginfo
 
 class SettingsWindow(GuiBase):
 	"""Settings window constructor"""
-	def __init__(self, mainapp):
-		self._mainapp = mainapp
-		self._mainwindow = mainapp.mainwindow
+	def __init__(self, app):
+		self._app = app
+		self._mainwin = app.mainwin
 
 		# load GUI
 		elements = (
@@ -17,7 +17,7 @@ class SettingsWindow(GuiBase):
 			"image-location-reload-button", "export-type-menu-button", "export-type-menu",
 			"export-width-spinbutton", "export-height-spinbutton",
 		)
-		super().__init__("settings.ui", "export-type-menu.ui", elements=elements, path=self._mainapp.resource_path)
+		super().__init__("settings.ui", "export-type-menu.ui", elements=elements, path=self._app.resource_path)
 
 		self.location_dialog = FileDialog(
 			self.gui["window"], "Add new images location",
@@ -35,23 +35,23 @@ class SettingsWindow(GuiBase):
 		self.gui["image-location-treeview"].set_model(self.image_location_store)
 
 		# gui setup
-		self.gui["export-width-spinbutton"].set_value(int(self._mainapp.settings.get_string("export-width")))
-		self.gui["export-height-spinbutton"].set_value(int(self._mainapp.settings.get_string("export-height")))
+		self.gui["export-width-spinbutton"].set_value(int(self._app.settings.get_string("export-width")))
+		self.gui["export-height-spinbutton"].set_value(int(self._app.settings.get_string("export-height")))
 
 		self.gui["export-type-menu-button"].set_menu_model(self.gui["export-type-menu"])
 		self._update_image_location_list()
 
 		# bind settings
-		self._mainapp.settings.bind(
+		self._app.settings.bind(
 			"export-width", self.gui["export-width-spinbutton"], "text", Gio.SettingsBindFlags.DEFAULT
 		)
-		self._mainapp.settings.bind(
+		self._app.settings.bind(
 			"export-height", self.gui["export-height-spinbutton"], "text", Gio.SettingsBindFlags.DEFAULT
 		)
 
 		# actions
 		self.actions = Gio.SimpleActionGroup()
-		type_variant = GLib.Variant.new_string(self._mainapp.settings.get_string("export-type"))
+		type_variant = GLib.Variant.new_string(self._app.settings.get_string("export-type"))
 		action = Gio.SimpleAction.new_stateful("export_type", type_variant.get_type(), type_variant)
 		action.connect("change-state", self._on_change_export_type)
 		self.actions.add_action(action)
@@ -76,9 +76,9 @@ class SettingsWindow(GuiBase):
 		if is_ok:
 			self.image_location_store.append([len(self.image_location_store), path])
 
-			locations = self._mainapp.settings.get_strv("images-location-list")
+			locations = self._app.settings.get_strv("images-location-list")
 			locations.append(path)
-			self._mainapp.settings.set_strv("images-location-list", locations)
+			self._app.settings.set_strv("images-location-list", locations)
 
 			logger.debug("Adding new image location: %s", path)
 		else:
@@ -92,9 +92,9 @@ class SettingsWindow(GuiBase):
 		if sel is not None:
 			index = model[sel][self.image_location_data.index.INDEX]
 
-			locations = self._mainapp.settings.get_strv("images-location-list")
+			locations = self._app.settings.get_strv("images-location-list")
 			del locations[index]
-			self._mainapp.settings.set_strv("images-location-list", locations)
+			self._app.settings.set_strv("images-location-list", locations)
 
 			self._update_image_location_list()
 
@@ -102,21 +102,21 @@ class SettingsWindow(GuiBase):
 	@debuginfo(False, False)
 	def _on_image_location_reload_button_clicked(self, button):
 		"""GUI handler"""
-		self._mainwindow.update_image_list()
-		self._mainapp.aboutdialog.rebuild()
+		self._mainwin.update_image_list()
+		self._app.aboutdialog.rebuild()
 
 	def _on_change_export_type(self, action, value):
 		"""Action handler"""
 		action.set_state(value)
 		type_ = value.get_string()
-		self._mainapp.settings.set_string("export-type", type_)
+		self._app.settings.set_string("export-type", type_)
 		logger.debug("Export type changed: %s", type_)
 
 	@debuginfo(False, False)
 	def _update_image_location_list(self):
 		"""Set image locations list for GUI treeview"""
 		self.image_location_store.clear()
-		for i, path in enumerate(self._mainapp.settings.get_strv("images-location-list")):
+		for i, path in enumerate(self._app.settings.get_strv("images-location-list")):
 			self.image_location_store.append([i, path])
 		self.gui["image-location-treeview"].set_cursor(0)
 

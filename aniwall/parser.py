@@ -77,6 +77,10 @@ class ImageData:
 		if file_ is None:
 			file_ = self.file
 
+		if not os.access(file_, os.W_OK):
+			logger.warning("Permission denied to change %s", file_)
+			return
+
 		transform_data = (self.shift[0], self.shift[1], self.scale)
 		self.tags["transform"].set("transform", "translate(%s,%s) scale(%s)" % transform_data)
 		self.tags["background"].set("fill", self.bg)
@@ -124,8 +128,8 @@ class ImageParser:
 	Image manager.
 	Read and edit SVG images.
 	"""
-	def __init__(self, mainapp, image_sample):
-		self._mainapp = mainapp
+	def __init__(self, app, image_sample):
+		self._app = app
 		self._testimage = image_sample
 		self.temporary = tempfile.NamedTemporaryFile()
 		self.parser = etree.XMLParser(remove_blank_text=True)
@@ -214,10 +218,10 @@ class ImageParser:
 	@debuginfo(False, False)
 	def export_image(self):
 		"""GUI handler"""
-		type_ = self._mainapp.settings.get_string("export-type")
-		file_ = os.path.join(self._mainapp.settings.get_string("export-path"), self.current.name + "." + type_)
-		width = self._mainapp.settings.get_string("export-width")
-		height = self._mainapp.settings.get_string("export-height")
+		type_ = self._app.settings.get_string("export-type")
+		file_ = os.path.join(self._app.settings.get_string("export-path"), self.current.name + "." + type_)
+		width = self._app.settings.get_string("export-width")
+		height = self._app.settings.get_string("export-height")
 		logger.debug("Exporting image: %s at size %sx%s", file_, width, height)
 
 		pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.temporary.name, int(width), int(height), False)

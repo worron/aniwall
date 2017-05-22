@@ -1,34 +1,36 @@
 import os
 
-from gi.repository import Gtk, GdkPixbuf, Gio
+from gi.repository import Gtk, GdkPixbuf, Gio, Gdk
 from aniwall.dialog import FileDialog, ConfirmDialog
 from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, pixbuf_from_hex
 
 # TODO: color moving inside palette
 # TODO: respect image aspect option
-# TODO: More GUI settings
-# TODO: GUI tooltips
 # TODO: GUI translation (?)
 
 
 class MainWindow(GuiBase):
 	"""Main window constructor"""
-	def __init__(self, mainapp):
-		self._mainapp = mainapp
-		self._parser = mainapp.parser
-		self.palette_extension = self._mainapp.settings.get_string("palette-extension")
+	def __init__(self, app):
+		self._app = app
+		self._parser = app.parser
+		self.palette_extension = self._app.settings.get_string("palette-extension")
 
 		# load GUI
 		elements = (
 			"window", "headerbar", "image-box", "image-list-treeview", "image-list-selection",
 			"preview", "color-box", "color-list-treeview", "color-list-selection", "image-search-entry",
 			"shift-x-spinbutton", "shift-y-spinbutton", "shift-x-spinbutton", "shift-y-spinbutton",
-			"scale-spinbutton", "color-list-scrolledwindow", "export-button", "export-as-button",
+			"scale-spinbutton", "color-list-scrolledwindow", "export-button", "export-as-button", "list-box",
 		)
-		super().__init__("mainwindow.ui", elements=elements, path=self._mainapp.resource_path)
+		super().__init__("mainwindow.ui", elements=elements, path=self._app.resource_path)
 
-		settings_ui = self._mainapp.settings.get_child("ui")
+		# set some gui sizes from settings
+		settings_ui = self._app.settings.get_child("ui")
+		self.gui["window"].set_default_size(*settings_ui.get_value("window-size"))
+		self.gui["list-box"].set_property("height_request", settings_ui.get_uint("list-box-height"))
+
 		self.IMAGE_OFFSET = settings_ui.get_uint("image-offset")
 		self.COLOR_VIEW_WIDTH = settings_ui.get_uint("color-view-width")
 		self.MIN_COLOR_COLUMN_WIDTH = int(self.COLOR_VIEW_WIDTH / 2)
@@ -73,7 +75,10 @@ class MainWindow(GuiBase):
 		)
 
 		# set application main window
-		self.gui["window"].set_application(mainapp)
+		self.gui["window"].set_application(app)
+
+		# system clipboard
+		self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
 		# actions
 		self.actions = {}
@@ -95,6 +100,9 @@ class MainWindow(GuiBase):
 		)
 		self.accelerators.connect(
 			*Gtk.accelerator_parse("<Control><Shift>e"), Gtk.AccelFlags.VISIBLE, self._on_export_as_button_clicked
+		)
+		self.accelerators.connect(
+			*Gtk.accelerator_parse("<Control>c"), Gtk.AccelFlags.VISIBLE, self.save_color_to_clipboard
 		)
 
 		# signals
@@ -141,14 +149,14 @@ class MainWindow(GuiBase):
 	def save_gui_state(self):
 		"""Save some GUI parameters across sessions"""
 		image_column_width = self.image_column.get_width()
-		settings_ui = self._mainapp.settings.get_child("ui")
+		settings_ui = self._app.settings.get_child("ui")
 		settings_ui.set_uint("image-column-width", image_column_width)
 		logger.debug("image-column-width: %d", image_column_width)
 
 	@debuginfo(False, False)
 	def update_image_list(self):
 		"""Set list of SVG images for GUI treeview"""
-		self._parser.load_images(*self._mainapp.settings.get_strv("images-location-list"))
+		self._parser.load_images(*self._app.settings.get_strv("images-location-list"))
 		with self.gui["image-list-selection"].handler_block(self.handler["selection"]):
 			self.image_store.clear()
 			for i, image in enumerate(self._parser.image_list):
@@ -178,6 +186,16 @@ class MainWindow(GuiBase):
 			self.gui["preview"].set_from_pixbuf(pixbuf)
 
 	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def save_color_to_clipboard(self, *args):
+		"""Save text representation of selected color to system clipboard"""
+		model, sel = self.gui["color-list-selection"].get_selected()
+		if sel is not None:
+			color = model[sel][self.color_view_data.index.HEX]
+			logger.debug("Copy to clipboard: %s", color)
+			self.clipboard.set_text(color, -1)
+
+	# noinspection PyUnusedLocal
 	def _image_search_filter_func(self, model, treeiter, data):
 		"""Function to filter images list by search text"""
 		if not self.image_search_text:
@@ -189,6 +207,12 @@ class MainWindow(GuiBase):
 		"""Set current image name and state to header bar"""
 		sub_title = "%s [modified]" % self._parser.current.name if modded else self._parser.current.name
 		self.gui["headerbar"].set_subtitle(sub_title)
+
+	def _update_gui_image_data(self):
+		"""Full up gui image geometry controllers with current data"""
+		self.gui["scale-spinbutton"].set_value(float(self._parser.current.scale))
+		self.gui["shift-x-spinbutton"].set_value(float(self._parser.current.shift[0]))
+		self.gui["shift-y-spinbutton"].set_value(float(self._parser.current.shift[1]))
 
 	@debuginfo(False, False)
 	def _on_image_selection_changed(self, selection):
@@ -203,9 +227,7 @@ class MainWindow(GuiBase):
 			# update title
 			self._set_subtitle()
 			# update image data
-			self.gui["scale-spinbutton"].set_value(float(self._parser.current.scale))
-			self.gui["shift-x-spinbutton"].set_value(float(self._parser.current.shift[0]))
-			self.gui["shift-y-spinbutton"].set_value(float(self._parser.current.shift[1]))
+			self._update_gui_image_data()
 
 	# noinspection PyUnusedLocal
 	def _on_image_resize(self, window, rectangle):
@@ -227,7 +249,7 @@ class MainWindow(GuiBase):
 		"""GUI handler"""
 		treeiter = self.color_store.get_iter(path)
 
-		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._mainapp.mainwindow.gui["window"], use_alpha=False)
+		color_dialog = Gtk.ColorChooserDialog("Choose Color", self._app.mainwin.gui["window"], use_alpha=False)
 		color_dialog.set_rgba(rgba_from_hex(self.color_store[treeiter][self.color_view_data.index.HEX]))
 		response = color_dialog.run()
 
@@ -274,12 +296,12 @@ class MainWindow(GuiBase):
 	def _on_export_as_button_clicked(self, *args):
 		"""GUI handler"""
 		is_ok, path, filename = self.export_dialog.run(
-			self._mainapp.settings.get_string("export-path"),
+			self._app.settings.get_string("export-path"),
 			self._parser.current.name
 		)
 		if is_ok:
 			name = os.path.splitext(os.path.basename(filename))[0]
-			self._mainapp.settings.set_string("export-path", path)
+			self._app.settings.set_string("export-path", path)
 			self._parser.current.name = name
 			self._parser.export_image()
 			logger.debug("New image export settings: [path: %s], [name: %s]" % (path, name))
@@ -321,6 +343,7 @@ class MainWindow(GuiBase):
 		self._parser.reset_changes()
 		self.update_preview()
 		self.update_color_list()
+		self._update_gui_image_data()
 		self._set_subtitle()
 
 	# noinspection PyUnusedLocal

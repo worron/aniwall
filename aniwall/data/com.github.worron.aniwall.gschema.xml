@@ -74,5 +74,19 @@
         Application GUI settings.
       </description>
     </key>
+    <key name="list-box-height" type="u">
+      <default>200</default>
+      <summary>Height of list views</summary>
+      <description>
+        Application GUI settings.
+      </description>
+    </key>
+    <key name="window-size" type="(uu)">
+      <default>(1200,800)</default>
+      <summary>Main window size</summary>
+      <description>
+        Application GUI settings.
+      </description>
+    </key>
   </schema>
 </schemalist>

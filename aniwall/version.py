@@ -1,10 +1,12 @@
 import os
-import re
 import subprocess
 
 from aniwall.logger import logger
 
-_FALLBACK_VERSION = 0.8
+_FALLBACK_VERSION = 0.9
+# noinspection SpellCheckingInspection
+_DEVELOPMENT_BRANCH = "devel"
+_MASTER_BRANCH = "master"
 _version_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "version")
 
 
@@ -15,16 +17,25 @@ def get_current():
 	"""
 	version = _FALLBACK_VERSION
 	try:
-		output = subprocess.check_output(
-			["git", "describe", "--tags", "--long"],
-			stderr=subprocess.PIPE,
-			cwd=os.path.dirname(os.path.abspath(__file__))
-		)
-		version = str(output, "utf-8").strip()
+		cwd_ = os.path.dirname(os.path.abspath(__file__))
 
-		commit_num = re.search("-(\d)", version).group(1)
-		if commit_num == "0":
-			version = version.split('-')[0]
+		output = subprocess.check_output(["git", "describe", "--tags", "--long"], stderr=subprocess.PIPE, cwd=cwd_)
+		describe = str(output, "utf-8").strip()
+		output = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.PIPE, cwd=cwd_)
+		branch = str(output, "utf-8").strip()
+
+		v, n, commit = describe.split('-')
+
+		if branch == _MASTER_BRANCH or n == "0":
+			# assume no fast forward merge used and first commit is "empty"
+			if int(n) <= 1:
+				version = v
+			else:
+				version = "%s.post%d" % (v, int(n) - 1)
+		elif branch == _DEVELOPMENT_BRANCH:
+			version = "%.1f.dev%s-%s" % (float(v) + 0.1, n, commit)
+		else:
+			version = "%s-%s-%s" % (v, branch, commit)
 	except Exception as e:
 		logger.debug("Can't read git output:\n%s", e)
 
