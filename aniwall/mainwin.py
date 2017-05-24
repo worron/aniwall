@@ -81,16 +81,11 @@ class MainWindow(GuiBase):
 		self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
 		# actions
-		self.actions = {}
-		self.actions["palette"] = Gio.SimpleActionGroup()
-
-		for name in ("import", "export", "reset", "save"):
-			action = Gio.SimpleAction.new(name, None)
-			action.connect("activate", getattr(self, "_on_palette_%s" % name))
-			self.actions["palette"].add_action(action)
-
-		for prefix, group in self.actions.items():
-			self.gui["window"].insert_action_group(prefix, group)
+		for scope, names in {"palette": ("import", "export"), "image": ("reset", "save")}.items():
+			for name in names:
+				action = Gio.SimpleAction.new("%s_%s" % (scope, name), None)
+				action.connect("activate", getattr(self, "_on_%s_%s" % (scope, name)))
+				self._app.add_action(action)
 
 		# accelerators
 		self.accelerators = Gtk.AccelGroup()
@@ -339,7 +334,7 @@ class MainWindow(GuiBase):
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
-	def _on_palette_reset(self, *args):
+	def _on_image_reset(self, *args):
 		"""Action handler"""
 		self._parser.reset_changes()
 		self.update_preview()
@@ -349,7 +344,7 @@ class MainWindow(GuiBase):
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
-	def _on_palette_save(self, *args):
+	def _on_image_save(self, *args):
 		"""Action handler"""
 		confirmed = self.confirm_dialog.run()
 		if confirmed:
