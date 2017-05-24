@@ -241,7 +241,8 @@ class MainWindow(GuiBase):
 		self.image_search_text = self.gui["image-search-entry"].get_text()
 		with self.gui["image-list-selection"].handler_block(self.handler["selection"]):
 			self.image_store_filter.refilter()
-			self.gui["image-list-treeview"].set_cursor(0)
+			self.gui["image-list-selection"].unselect_all()
+		self.gui["image-list-treeview"].set_cursor(0)
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
