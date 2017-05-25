@@ -46,6 +46,22 @@
               <packing>
                 <property name="pack_type">end</property>
               </packing>
+              </child>
+              <child>
+                <object class="GtkToggleButton" id="aspect-button">
+                  <property name="tooltip_text">Save image aspect</property>
+                  <child>
+                    <object class="GtkImage" id="lock-icon">
+                      <property name="icon-name">system-lock-screen-symbolic</property>
+                    </object>
+                  </child>
+                  <style>
+                    <class name="flat"/>
+                  </style>
+                </object>
+                <packing>
+                  <property name="pack_type">end</property>
+                </packing>
             </child>
             <child>
               <object class="GtkSpinButton" id="export-height-spinbutton">

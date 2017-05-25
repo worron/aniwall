@@ -6,7 +6,6 @@ from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, pixbuf_from_hex
 
 # TODO: color moving inside palette
-# TODO: respect image aspect option
 # TODO: GUI translation (?)
 
 
