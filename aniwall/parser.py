@@ -72,6 +72,10 @@ class ImageData:
 		"""Change image main figure scale"""
 		self.scale = value
 
+	def swap_colors(self, i1, i2):
+		"""Swap colors by index"""
+		self.colors[i1], self.colors[i2] = self.colors[i2], self.colors[i1]
+
 	def rebuild(self, file_=None):
 		"""Apply image changes"""
 		if file_ is None:
