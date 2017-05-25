@@ -4,9 +4,6 @@
 # Ignore IDE settings
 .idea/**
 
-# Temporary ignore (test) images
-images/**
-
 # Ignore GTK+ binary
 aniwall/data/aniwall.gresource  
 aniwall/data/gschemas.compiled
