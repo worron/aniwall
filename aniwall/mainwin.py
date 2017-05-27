@@ -5,8 +5,6 @@ from aniwall.dialog import FileDialog, ConfirmDialog
 from aniwall.logger import logger, debuginfo
 from aniwall.common import TreeViewData, GuiBase, hex_from_rgba, rgba_from_hex, pixbuf_from_hex
 
-# TODO: color moving inside palette
-# TODO: respect image aspect option
 # TODO: GUI translation (?)
 
 
@@ -81,16 +79,11 @@ class MainWindow(GuiBase):
 		self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
 		# actions
-		self.actions = {}
-		self.actions["palette"] = Gio.SimpleActionGroup()
-
-		for name in ("import", "export", "reset", "save"):
-			action = Gio.SimpleAction.new(name, None)
-			action.connect("activate", getattr(self, "_on_palette_%s" % name))
-			self.actions["palette"].add_action(action)
-
-		for prefix, group in self.actions.items():
-			self.gui["window"].insert_action_group(prefix, group)
+		for scope, names in {"palette": ("import", "export"), "image": ("reset", "save")}.items():
+			for name in names:
+				action = Gio.SimpleAction.new("%s_%s" % (scope, name), None)
+				action.connect("activate", getattr(self, "_on_%s_%s" % (scope, name)))
+				self._app.add_action(action)
 
 		# accelerators
 		self.accelerators = Gtk.AccelGroup()
@@ -103,6 +96,12 @@ class MainWindow(GuiBase):
 		)
 		self.accelerators.connect(
 			*Gtk.accelerator_parse("<Control>c"), Gtk.AccelFlags.VISIBLE, self.save_color_to_clipboard
+		)
+		self.accelerators.connect(
+			*Gtk.accelerator_parse("<Control>Up"), Gtk.AccelFlags.VISIBLE, self._on_color_move_up
+		)
+		self.accelerators.connect(
+			*Gtk.accelerator_parse("<Control>Down"), Gtk.AccelFlags.VISIBLE, self._on_color_move_down
 		)
 
 		# signals
@@ -165,14 +164,15 @@ class MainWindow(GuiBase):
 		self.gui["image-list-treeview"].set_cursor(0)
 
 	@debuginfo(False, False)
-	def update_color_list(self):
+	def update_color_list(self, set_cursor=True):
 		"""Set color palette for GUI treeview"""
 		self.color_store.clear()
 		for line in self._parser.current.get_palette():
 			pixbuf = pixbuf_from_hex(line["hex"], width=self.PIXBUF_PATTERN_WIDTH)
 			self.color_store.append([line["index"], line["name"], pixbuf, line["hex"]])
 
-		self.gui["color-list-treeview"].set_cursor(0)
+		if set_cursor:
+			self.gui["color-list-treeview"].set_cursor(0)
 
 	def update_preview(self):
 		"""Update current image preview"""
@@ -241,7 +241,8 @@ class MainWindow(GuiBase):
 		self.image_search_text = self.gui["image-search-entry"].get_text()
 		with self.gui["image-list-selection"].handler_block(self.handler["selection"]):
 			self.image_store_filter.refilter()
-			self.gui["image-list-treeview"].set_cursor(0)
+			self.gui["image-list-selection"].unselect_all()
+		self.gui["image-list-treeview"].set_cursor(0)
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
@@ -263,11 +264,39 @@ class MainWindow(GuiBase):
 				hex_color, width=self.PIXBUF_PATTERN_WIDTH
 			)
 			self._parser.current.change_color(hex_color, color_index)
-			self._parser.apply_changes()
-			self.update_preview()
-			self._set_subtitle(True)
+			self._color_changes_apply()
 
 		color_dialog.destroy()
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_color_move_up(self, *args):
+		"""GUI handler"""
+		model, sel = self.gui["color-list-selection"].get_selected()
+		if sel is not None and model[sel][self.color_view_data.index.INDEX] > 1:
+			index = model[sel][self.color_view_data.index.INDEX]
+			self._do_color_swap(index, index - 1)
+
+	# noinspection PyUnusedLocal
+	@debuginfo(False, False)
+	def _on_color_move_down(self, *args):
+		"""GUI handler"""
+		model, sel = self.gui["color-list-selection"].get_selected()
+		if sel is not None and 0 < model[sel][self.color_view_data.index.INDEX] < (len(model) - 1):
+			index = model[sel][self.color_view_data.index.INDEX]
+			self._do_color_swap(index, index + 1)
+
+	def _do_color_swap(self, index1, index2):
+		self._parser.current.swap_colors(index1 - 1, index2 - 1)  # parser color index = model index - 1
+		self.update_color_list(set_cursor=False)
+		self._color_changes_apply()
+		self.gui["color-list-treeview"].set_cursor(index2)
+
+	def _color_changes_apply(self):
+		"""Update gui elements after color changes"""
+		self._parser.apply_changes()
+		self.update_preview()
+		self._set_subtitle(True)
 
 	@debuginfo(False, False)
 	def _on_shift_spinbutton_value_changed(self, button, index):
@@ -338,7 +367,7 @@ class MainWindow(GuiBase):
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
-	def _on_palette_reset(self, *args):
+	def _on_image_reset(self, *args):
 		"""Action handler"""
 		self._parser.reset_changes()
 		self.update_preview()
@@ -348,7 +377,7 @@ class MainWindow(GuiBase):
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)
-	def _on_palette_save(self, *args):
+	def _on_image_save(self, *args):
 		"""Action handler"""
 		confirmed = self.confirm_dialog.run()
 		if confirmed:

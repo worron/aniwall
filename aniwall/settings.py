@@ -15,7 +15,7 @@ class SettingsWindow(GuiBase):
 			"window", "image-location-add-button", "image-location-add-button", "image-location-treeview",
 			"image-location-add-button", "image-location-remove-button", "image-location-selection",
 			"image-location-reload-button", "export-type-menu-button", "export-type-menu",
-			"export-width-spinbutton", "export-height-spinbutton",
+			"export-width-spinbutton", "export-height-spinbutton", "aspect-button",
 		)
 		super().__init__("settings.ui", "export-type-menu.ui", elements=elements, path=self._app.resource_path)
 
@@ -37,9 +37,11 @@ class SettingsWindow(GuiBase):
 		# gui setup
 		self.gui["export-width-spinbutton"].set_value(int(self._app.settings.get_string("export-width")))
 		self.gui["export-height-spinbutton"].set_value(int(self._app.settings.get_string("export-height")))
+		self.gui["aspect-button"].set_active(self._app.settings.get_boolean("image-aspect-lock"))
 
 		self.gui["export-type-menu-button"].set_menu_model(self.gui["export-type-menu"])
 		self._update_image_location_list()
+		self._update_image_aspect()
 
 		# bind settings
 		self._app.settings.bind(
@@ -47,6 +49,9 @@ class SettingsWindow(GuiBase):
 		)
 		self._app.settings.bind(
 			"export-height", self.gui["export-height-spinbutton"], "text", Gio.SettingsBindFlags.DEFAULT
+		)
+		self._app.settings.bind(
+			"image-aspect-lock", self.gui["aspect-button"], "active", Gio.SettingsBindFlags.DEFAULT
 		)
 
 		# actions
@@ -63,10 +68,46 @@ class SettingsWindow(GuiBase):
 		self.accelerators.connect(*Gtk.accelerator_parse("Escape"), Gtk.AccelFlags.VISIBLE, self.hide)
 
 		# signals
+		self.handler = {}
+		self.handler["image-width-change"] = self.gui["export-width-spinbutton"].connect(
+			"value-changed", self._on_export_width_spinbutton_value_changed
+		)
+		self.handler["image-height-change"] = self.gui["export-height-spinbutton"].connect(
+			"value-changed", self._on_export_height_spinbutton_value_changed
+		)
+
 		self.gui["window"].connect("delete-event", self.hide)
 		self.gui["image-location-add-button"].connect("clicked", self._on_image_location_add_button_clicked)
 		self.gui["image-location-remove-button"].connect("clicked", self._on_image_location_remove_button_clicked)
 		self.gui["image-location-reload-button"].connect("clicked", self._on_image_location_reload_button_clicked)
+		self.gui["aspect-button"].connect("toggled", self._on_aspect_button_toggled)
+
+	def _update_image_aspect(self):
+		"""Update export image aspect settings"""
+		w = int(self._app.settings.get_string("export-width"))
+		h = int(self._app.settings.get_string("export-height"))
+		self.image_aspect = w / h
+		logger.debug("New image aspect: %s", self.image_aspect)
+
+	@debuginfo(False, False)
+	def _on_export_width_spinbutton_value_changed(self, button):
+		"""GUI handler"""
+		if self.gui["aspect-button"].get_active():
+			with self.gui["export-height-spinbutton"].handler_block(self.handler["image-height-change"]):
+				self.gui["export-height-spinbutton"].set_value(int(button.get_value() / self.image_aspect))
+
+	@debuginfo(False, False)
+	def _on_export_height_spinbutton_value_changed(self, button):
+		"""GUI handler"""
+		if self.gui["aspect-button"].get_active():
+			with self.gui["export-width-spinbutton"].handler_block(self.handler["image-width-change"]):
+				self.gui["export-width-spinbutton"].set_value(int(button.get_value() * self.image_aspect))
+
+	def _on_aspect_button_toggled(self, button):
+		"""GUI handler"""
+		if button.get_active():
+			self._update_image_aspect()
+			logger.debug("Image aspect locked")
 
 	# noinspection PyUnusedLocal
 	@debuginfo(False, False)

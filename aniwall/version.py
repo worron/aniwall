@@ -3,7 +3,7 @@ import subprocess
 
 from aniwall.logger import logger
 
-_FALLBACK_VERSION = 0.9
+_FALLBACK_VERSION = 1.0
 # noinspection SpellCheckingInspection
 _DEVELOPMENT_BRANCH = "devel"
 _MASTER_BRANCH = "master"
@@ -27,11 +27,8 @@ def get_current():
 		v, n, commit = describe.split('-')
 
 		if branch == _MASTER_BRANCH or n == "0":
-			# assume no fast forward merge used and first commit is "empty"
-			if int(n) <= 1:
-				version = v
-			else:
-				version = "%s.post%d" % (v, int(n) - 1)
+			# TODO: does it possible to proper count commit on master branch?
+			version = v
 		elif branch == _DEVELOPMENT_BRANCH:
 			version = "%.1f.dev%s-%s" % (float(v) + 0.1, n, commit)
 		else:

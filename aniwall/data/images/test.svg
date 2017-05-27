@@ -1,4 +1,4 @@
-<svg height="1080" viewBox="0 0 1920 1080" width="1920" xmlns="http://www.w3.org/2000/svg">
+<svg height="1080" width="1920" xmlns="http://www.w3.org/2000/svg">
   <path id="background" d="m0 0v1080h1920v-1080z" fill="#202020"/>
   <g id="transform" transform="translate(0,0) scale(1.00)">
     <path id="color1" d="m260.791 102.853v360h640v-360z" fill="#a00000"/>

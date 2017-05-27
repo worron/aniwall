@@ -122,7 +122,7 @@ class Application(Gtk.Application):
 		self.mainwin.update_preview()
 
 	def do_activate(self):
-		if not self.mainwin:
+		if self.mainwin is None:
 			logger.info("Start aniwall application")
 			self._load_resources()
 			self._do_startup()
@@ -138,7 +138,8 @@ class Application(Gtk.Application):
 
 	def do_shutdown(self):
 		logger.info("Exit aniwall application")
-		self.mainwin.save_gui_state()
+		if self.mainwin is not None:
+			self.mainwin.save_gui_state()
 		Gtk.Application.do_shutdown(self)
 
 	# noinspection PyMethodMayBeStatic

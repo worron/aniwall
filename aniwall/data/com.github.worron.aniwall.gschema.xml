@@ -49,7 +49,14 @@
       <description>
         User defined palette can be saved to files with given extension. Files format is plain text ini anyway.
       </description>
-    </key>
+      </key>
+          <key name="image-aspect-lock" type="b">
+        <default>true</default>
+        <summary>Respect export image aspect</summary>
+        <description>
+          Save export image aspect while changing width/height settings.
+        </description>
+      </key>
     <child name="ui" schema="com.github.worron.aniwall.ui"/>
   </schema>
   <schema id="com.github.worron.aniwall.ui" path="/com/github/worron/aniwall/ui/">
