@@ -3,7 +3,7 @@ import subprocess
 
 from aniwall.logger import logger
 
-_FALLBACK_VERSION = 0.9
+_FALLBACK_VERSION = 1.0
 # noinspection SpellCheckingInspection
 _DEVELOPMENT_BRANCH = "devel"
 _MASTER_BRANCH = "master"
