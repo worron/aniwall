@@ -25,7 +25,7 @@ As application mostly written with python it can be launched without installatio
 ```shell
 $ git clone https://github.com/worron/aniwall.git ~/aniwall
 $ glib-compile-schemas ~/aniwall/aniwall/data
-$ cd ~/aniwall/aniwall/data && glib-compile-resources aniwall.gresource.xm
+$ cd ~/aniwall/aniwall/data && glib-compile-resources aniwall.gresource.xml
 $ python3 ~/aniwall/aniwall/run.py
 ```
 #### Image Pattern Format
