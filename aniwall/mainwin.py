@@ -81,7 +81,7 @@ class MainWindow(GuiBase):
 		# actions
 		for scope, names in {"palette": ("import", "export"), "image": ("reset", "save")}.items():
 			for name in names:
-				action = Gio.SimpleAction.new("%s_%s" % (scope, name), None)
+				action = Gio.SimpleAction.new("%s-%s" % (scope, name), None)
 				action.connect("activate", getattr(self, "_on_%s_%s" % (scope, name)))
 				self._app.add_action(action)
 

@@ -6,12 +6,12 @@
         <attribute name="label" >Image</attribute>
         <section>
           <item>
-            <attribute name="action">app.image_save</attribute>
+            <attribute name="action">app.image-save</attribute>
             <attribute name="label">_Save Changes</attribute>
             <attribute name="accel">&lt;Control&gt;s</attribute>
           </item>
           <item>
-            <attribute name="action">app.image_reset</attribute>
+            <attribute name="action">app.image-reset</attribute>
             <attribute name="label">_Reset Changes</attribute>
             <attribute name="accel">&lt;Control&gt;r</attribute>
           </item>
@@ -21,11 +21,11 @@
         <attribute name="label" >Palette</attribute>
         <section>
           <item>
-            <attribute name="action">app.palette_import</attribute>
+            <attribute name="action">app.palette-import</attribute>
             <attribute name="label">Import</attribute>
           </item>
           <item>
-            <attribute name="action">app.palette_export</attribute>
+            <attribute name="action">app.palette-export</attribute>
             <attribute name="label">Export</attribute>
           </item>
         </section>
