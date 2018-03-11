@@ -111,7 +111,7 @@ class MainWindow(GuiBase):
 		)
 
 		self.gui["color-list-treeview"].connect("row_activated", self._on_color_activated)
-		self.gui["window"].connect("size-allocate", self._on_image_resize)
+		self.gui["preview"].connect("size-allocate", self._on_image_resize)
 		self.gui["image-search-entry"].connect("activate", self._on_image_search_activate)
 		self.gui["shift-x-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 0)
 		self.gui["shift-y-spinbutton"].connect("value-changed", self._on_shift_spinbutton_value_changed, 1)
