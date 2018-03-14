@@ -4,6 +4,7 @@ Simple GUI application for creating custom colored minimalist wallpapers from im
 
 #### Screenshots
 <p align="center"><img src="http://i.imgur.com/ceRbAXh.png"></p>
+<p align="center"><a href="https://youtu.be/OoHnJsiGe-Y">Video Demo</a></p>
 
 #### Dependencies
 * GTK+ >= 3.18
