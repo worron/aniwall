@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Aniwall
+Comment=Create custom colored wallpapers
+Exec=aniwall
+Terminal=false
+Icon=aniwall
+Type=Application
+Categories=Graphics;GTK
+StartupNotify=false
